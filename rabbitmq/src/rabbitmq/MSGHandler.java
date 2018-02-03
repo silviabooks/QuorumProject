@@ -32,7 +32,8 @@ public class MSGHandler {
         Pattern timestampPattern = 
                 Pattern.compile("\\d{4}(-\\d{2}){2} (\\d{2}:){2}\\d{2}.\\d{3}");
         Pattern machineIDPattern = Pattern.compile("WARN( )+.+ - ");
-        // TODO aggiungere il pattern per il messaggio del messaggio (vabbè hai capito)
+        // We assume that the body of the message is all that follows " - "
+        Pattern msgPattern = Pattern.compile(" - .*");
         System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
 
         Consumer consumer = new DefaultConsumer(channel) {
@@ -58,7 +59,11 @@ public class MSGHandler {
                         String timestamp = timestampMatcher.group();
                         System.out.println(timestamp); // to be saved in db
                     }
-                    // TODO aggiungere la parte per estrapolare il corpo
+                    Matcher msgMatcher = msgPattern.matcher(message);
+                    if (msgMatcher.find()) {
+                        String msg = msgMatcher.group();
+                        System.out.println(msg); // to be saved in db
+                    }
                 }
             }
         };
