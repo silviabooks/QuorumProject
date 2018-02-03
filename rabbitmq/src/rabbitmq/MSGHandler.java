@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 /**
  * Il MSGHandler salva il log sul DB solo se l’oggetto è 
  * “Error receiving object from	“ e l’IP è 10.18.122.24 o 10.18.122.30
- * Sul DB viene salvato: Timestamp – IdMacchina (qual è l'ID macchina?!?) - Messaggio	
+ * Sul DB viene salvato: Timestamp – IdMacchina - Messaggio	
  * @author silvia
  */
 public class MSGHandler {
@@ -62,6 +62,7 @@ public class MSGHandler {
                     Matcher msgMatcher = msgPattern.matcher(message);
                     if (msgMatcher.find()) {
                         String msg = msgMatcher.group();
+                        msg = msg.replaceAll(" - ", "");
                         System.out.println(msg); // to be saved in db
                     }
                 }
