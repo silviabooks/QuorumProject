@@ -12,3 +12,6 @@
 /Quorum_Project_utilities/build/
 /Quorum_Project_utilities/dist/
 /Quorum_Project_utilities/nbproject/private/
+rabbitmq/nbproject/private/
+rabbitmq/dist/
+rabbitmq/build/
