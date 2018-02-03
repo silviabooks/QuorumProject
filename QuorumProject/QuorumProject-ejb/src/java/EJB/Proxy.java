@@ -1,0 +1,87 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package EJB;
+
+import Util.Log;
+import Util.VersionNumber;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.annotation.PostConstruct;
+import javax.ejb.EJB;
+import javax.ejb.Singleton;
+
+/**
+ *
+ * @author zartyuk
+ */
+@Singleton
+public class Proxy implements ProxyLocal {
+
+    @EJB(beanName = "secondReplica")
+    private ReplicaBeanLocal secondReplica;
+
+    @EJB(beanName = "firstReplica")
+    private ReplicaBeanLocal replicaBean;
+    
+    private ArrayList<ReplicaBeanLocal> replicas = new ArrayList<>();
+    
+    /**
+     * Set the Quorum value for 5 replicas
+     * Read = 2
+     * Write = 4
+     */
+    private int quorumRead = 1;
+    private int quorumWrite = 2;
+    
+    @PostConstruct
+    public void init() {
+        replicas.add(this.replicaBean);
+        replicas.add(this.secondReplica);
+        System.out.println("Added beans in List");
+    }
+    
+    public String readResult() {
+        Collections.shuffle(replicas);
+        ReplicaBeanLocal aux = replicas.get(0);
+        for (int i=1; i<quorumRead; i++) {
+            if (replicas.get(i).getNum().getTimestamp() > aux.getNum().getTimestamp()) aux = replicas.get(i);
+            else if(replicas.get(i).getNum().getTimestamp() == aux.getNum().getTimestamp()) {
+                if(replicas.get(i).getNum().getId() > aux.getNum().getId()) aux = replicas.get(i);
+            }
+        }
+        aux.test();
+        try {
+            return aux.readReplica();
+        } catch (SQLException ex) {
+            Logger.getLogger(Proxy.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        return "{}";
+    }
+    
+    public void writeResult(Log l) throws SQLException {
+        Collections.shuffle(replicas);
+        VersionNumber num = replicas.get(0).getNum();
+        replicas.get(0).writeReplica(l);
+        for (int i=1; i<quorumWrite; i++) {
+            if (replicas.get(i).getNum().getTimestamp() > num.getTimestamp()) num = replicas.get(i).getNum();
+            else if(replicas.get(i).getNum().getTimestamp() == num.getTimestamp()) {
+                if(replicas.get(i).getNum().getId() > num.getId()) num = replicas.get(i).getNum();
+            }
+            replicas.get(i).writeReplica(l);
+        }
+        for (int i=0; i<quorumWrite; i++) {
+            replicas.get(i).updateTimestamp(num.getTimestamp()+1);
+        }
+    }
+    
+    public void example() {
+        System.out.println("Sono nel proxy");
+    }
+}
