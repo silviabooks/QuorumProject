@@ -17,6 +17,9 @@ public class Log implements Serializable {
     private String idMacchina;
     private String message;
 
+    public Log() {
+    }
+    
     public Log(Timestamp timestamp, String idMacchina, String message) {
         this.timestamp = timestamp;
         this.idMacchina = idMacchina;
@@ -34,7 +37,19 @@ public class Log implements Serializable {
     public String getMessage() {
         return message;
     }
-    
+
+    public void setTimestamp(Timestamp timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public void setIdMacchina(String idMacchina) {
+        this.idMacchina = idMacchina;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+        
     @Override
     public String toString() {
         return "Log{" + "timestamp=" + timestamp + ", idMacchina=" + idMacchina + ", message=" + message + '}';

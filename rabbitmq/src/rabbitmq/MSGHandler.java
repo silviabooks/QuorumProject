@@ -24,7 +24,7 @@ import java.util.logging.Logger;
  */
 public class MSGHandler {
     private static final String EXCHANGE_NAME = "logs";
-
+    private static int counter = 0;
     public static void main(String[] argv) throws Exception {
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost("localhost");
@@ -44,6 +44,13 @@ public class MSGHandler {
         Pattern machineIDPattern = Pattern.compile("WARN( )+.+ - ");
         // We assume that the body of the message is all that follows " - "
         Pattern msgPattern = Pattern.compile(" - .*");
+                
+        Log log = new Log();
+        Client client = Client.create();
+        Gson reqGson = new Gson();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
+        Timestamp timestampSql = new java.sql.Timestamp(0);
+        
         System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
 
         Consumer consumer = new DefaultConsumer(channel) {
@@ -54,7 +61,6 @@ public class MSGHandler {
                 // System.out.println(" [x] Received '" + message + "'");
                 // analyze string and check for particular message and IP address
                 String timestamp = null, machineID = null, msg = null;
-                Timestamp timestampSql = null;
                 if (message.contains("Error receiving object from") &
                         (message.contains("10.18.122.24") | 
                         message.contains("10.18.122.30"))) {
@@ -72,9 +78,8 @@ public class MSGHandler {
                         System.out.println(timestamp);
                         // convert timestamp string to java.sql.Timestamp
                         try {
-                            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
                             Date parsedDate = dateFormat.parse(timestamp);
-                            timestampSql = new java.sql.Timestamp(parsedDate.getTime());
+                            timestampSql.setTime(parsedDate.getTime());
                         } catch (ParseException ex) {
                             Logger.getLogger(MSGHandler.class.getName()).log(Level.SEVERE, null, ex);
                         }
@@ -86,17 +91,41 @@ public class MSGHandler {
                         msg = msg.replaceAll(" - ", "");
                         System.out.println(msg);
                     }
+                    counter += 1;
                 }
                 // Send log to controller via POST request
-                Client client = Client.create();
-                //Log log = new Log(timestampSql, machineID, msg);
-                Date date = new Date();
-                Log log = new Log(new java.sql.Timestamp(date.getTime()), "prova", "prova");
+                // TODO: salvare i Log in un array di log
+                // TODO: inviare le POST ogni 10
+                // TODO: cambiare la ricezione adeguatamente
+                //   (deve capire che gli è stato inviato un array di log e non uno solo)
+                /*
+                if (counter == 10) {
+                    counter = 0;
+                    log.setIdMacchina(machineID);
+                    log.setMessage(msg);
+                    log.setTimestamp(timestampSql);
+                    //Log log = new Log(new java.sql.Timestamp(date.getTime()), "prova", "prova");
+                    System.out.println("VOGLIO INVIARE: " + log.toString());
+                    String reqString = reqGson.toJson(log);
+                    WebResource webResourcePost = client
+                            .resource("http://localhost:8080/QuorumProject-war/gestione/log/post");
+                    ClientResponse rispostaPost = webResourcePost
+                            .post(ClientResponse.class, reqString);
+                    System.out.println("HO RICEVUTO: " + rispostaPost.getEntity(String.class));       
+                }*/
+                
+                log.setIdMacchina(machineID);
+                log.setMessage(msg);
+                log.setTimestamp(timestampSql);
+                //Log log = new Log(new java.sql.Timestamp(date.getTime()), "prova", "prova");
                 System.out.println("VOGLIO INVIARE: " + log.toString());
-                String string = new Gson().toJson(log);
-                WebResource webResourcePost = client.resource("http://localhost:8080/QuorumProject-war/gestione/log/post");
-                ClientResponse rispostaPost = webResourcePost.post(ClientResponse.class, string);
-                System.out.println("HO RICEVUTO: " + rispostaPost.getEntity(String.class));                
+                String reqString = reqGson.toJson(log);
+                WebResource webResourcePost = client
+                        .resource("http://localhost:8080/QuorumProject-war/gestione/log/post");
+                ClientResponse rispostaPost = webResourcePost
+                        .post(ClientResponse.class, reqString);
+                System.out.println("HO RICEVUTO: " + rispostaPost.getEntity(String.class));
+                
             }
         };
         channel.basicConsume(queueName, true, consumer);
