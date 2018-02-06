@@ -7,6 +7,7 @@ package EJB;
 
 import Util.Log;
 import Util.VersionNumber;
+import java.io.IOException;
 import java.sql.SQLException;
 import javax.ejb.Local;
 
@@ -25,6 +26,7 @@ public interface ReplicaBeanLocal {
 
     public VersionNumber getNum();
 
-    public void updateTimestamp(int timestamp);
-    
+    public void updateVersionNumber(int timestamp, Log l);
+
+    public void unserialize(String string) throws IOException;
 }

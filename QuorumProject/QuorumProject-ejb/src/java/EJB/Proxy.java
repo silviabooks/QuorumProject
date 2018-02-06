@@ -5,8 +5,10 @@
  */
 package EJB;
 
+import Util.ElementQueueComparator;
 import Util.Log;
 import Util.VersionNumber;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,6 +16,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
+import javax.ejb.Lock;
+import javax.ejb.LockType;
 import javax.ejb.Singleton;
 
 /**
@@ -44,8 +48,14 @@ public class Proxy implements ProxyLocal {
         replicas.add(this.replicaBean);
         replicas.add(this.secondReplica);
         System.out.println("Added beans in List");
+        try {
+            replicaBean.unserialize("replica1queue.dat");
+        } catch (IOException ex) {
+            Logger.getLogger(Proxy.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
+    @Lock(LockType.READ)
     public String readResult() {
         Collections.shuffle(replicas);
         ReplicaBeanLocal aux = replicas.get(0);
@@ -65,6 +75,7 @@ public class Proxy implements ProxyLocal {
         return "{}";
     }
     
+    @Lock(LockType.WRITE)
     public void writeResult(Log l) throws SQLException {
         Collections.shuffle(replicas);
         VersionNumber num = replicas.get(0).getNum();
@@ -77,7 +88,7 @@ public class Proxy implements ProxyLocal {
             replicas.get(i).writeReplica(l);
         }
         for (int i=0; i<quorumWrite; i++) {
-            replicas.get(i).updateTimestamp(num.getTimestamp()+1);
+            replicas.get(i).updateVersionNumber(num.getTimestamp()+1, l);
         }
     }
     

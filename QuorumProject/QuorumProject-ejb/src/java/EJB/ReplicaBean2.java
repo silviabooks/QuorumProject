@@ -9,6 +9,7 @@ import Connettore.ConnettoreMySQL;
 import Util.Log;
 import Util.VersionNumber;
 import com.google.gson.Gson;
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -57,7 +58,10 @@ public class ReplicaBean2 implements ReplicaBeanLocal {
     }
 
     @Override
-    public void updateTimestamp(int timestamp) {
+    public void updateVersionNumber(int timestamp, Log l) {
         num.setTimestamp(timestamp);
     }
+    
+    @Override
+    public void unserialize(String string) throws IOException {}
 }

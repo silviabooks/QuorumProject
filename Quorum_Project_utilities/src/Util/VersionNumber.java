@@ -5,27 +5,29 @@
  */
 package Util;
 
+import java.io.Serializable;
+
 /**
  *
  * @author zartyuk
  */
-public class VersionNumber {
+public class VersionNumber implements Serializable {
     
-    private int timestamp;
-    private int id;
+    private Integer timestamp;
+    private Integer id;
     
-    public VersionNumber(int timestamp, int id) {
+    public VersionNumber(Integer timestamp, Integer id) {
         this.id = id;
         this.timestamp = timestamp;
     }
 
     public VersionNumber() {}
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public int getTimestamp() {
+    public Integer getTimestamp() {
         return timestamp;
     }
 
