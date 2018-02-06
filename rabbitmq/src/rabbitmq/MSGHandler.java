@@ -24,7 +24,10 @@ import java.util.logging.Logger;
  */
 public class MSGHandler {
     private static final String EXCHANGE_NAME = "logs";
+    private static final String URL_POST = 
+            "http://localhost:8080/QuorumProject-war/gestione/log/post";
     private static int counter = 0;
+    
     public static void main(String[] argv) throws Exception {
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost("localhost");
@@ -48,7 +51,8 @@ public class MSGHandler {
         Log log = new Log();
         Client client = Client.create();
         Gson reqGson = new Gson();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
+        SimpleDateFormat dateFormat = 
+                new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
         Timestamp timestampSql = new java.sql.Timestamp(0);
         
         System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
@@ -94,38 +98,19 @@ public class MSGHandler {
                     counter += 1;
                 }
                 // Send log to controller via POST request
-                // TODO: salvare i Log in un array di log
-                // TODO: inviare le POST ogni 10
-                // TODO: cambiare la ricezione adeguatamente
-                //   (deve capire che gli è stato inviato un array di log e non uno solo)
-                /*
-                if (counter == 10) {
+                //if (counter == 10) {
                     counter = 0;
                     log.setIdMacchina(machineID);
                     log.setMessage(msg);
                     log.setTimestamp(timestampSql);
-                    //Log log = new Log(new java.sql.Timestamp(date.getTime()), "prova", "prova");
                     System.out.println("VOGLIO INVIARE: " + log.toString());
                     String reqString = reqGson.toJson(log);
-                    WebResource webResourcePost = client
-                            .resource("http://localhost:8080/QuorumProject-war/gestione/log/post");
+                    WebResource webResourcePost = client.resource(URL_POST);
                     ClientResponse rispostaPost = webResourcePost
                             .post(ClientResponse.class, reqString);
-                    System.out.println("HO RICEVUTO: " + rispostaPost.getEntity(String.class));       
-                }*/
-                
-                log.setIdMacchina(machineID);
-                log.setMessage(msg);
-                log.setTimestamp(timestampSql);
-                //Log log = new Log(new java.sql.Timestamp(date.getTime()), "prova", "prova");
-                System.out.println("VOGLIO INVIARE: " + log.toString());
-                String reqString = reqGson.toJson(log);
-                WebResource webResourcePost = client
-                        .resource("http://localhost:8080/QuorumProject-war/gestione/log/post");
-                ClientResponse rispostaPost = webResourcePost
-                        .post(ClientResponse.class, reqString);
-                System.out.println("HO RICEVUTO: " + rispostaPost.getEntity(String.class));
-                
+                    System.out.println("HO RICEVUTO: "
+                            + rispostaPost.getEntity(String.class));       
+                //}
             }
         };
         channel.basicConsume(queueName, true, consumer);
