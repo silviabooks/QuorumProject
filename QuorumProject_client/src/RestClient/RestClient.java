@@ -18,20 +18,24 @@ import java.util.Date;
  */
 public class RestClient {
 
+    private static final String ENDPOINT = 
+            "http://localhost:8080/QuorumProject-war/gestione/log/";
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
         Client client = Client.create();
         Date date = new Date();
-        Log log = new Log(new java.sql.Timestamp(date.getTime()) ,"prova", "spero funzioni");
+        Log log = new Log(new java.sql.Timestamp(date.getTime()) ,"prova", 
+                "spero funzioni");
         System.out.println(log.toString());
         String string = new Gson().toJson(log);
-        WebResource webResourcePost = client.resource("http://localhost:8080/QuorumProject-war/gestione/log/post");
-        ClientResponse rispostaPost = webResourcePost.post(ClientResponse.class, string);
+        WebResource webResourcePost = client.resource(ENDPOINT + "post");
+        ClientResponse rispostaPost = webResourcePost
+                .post(ClientResponse.class, string);
         System.out.println(rispostaPost.getEntity(String.class));
         
-        WebResource webResource = client.resource("http://localhost:8080/QuorumProject-war/gestione/log/get");
+        WebResource webResource = client.resource(ENDPOINT + "get");
         ClientResponse rispostaGet = webResource.get(ClientResponse.class);
         System.out.println(rispostaGet.getEntity(String.class));
     }
