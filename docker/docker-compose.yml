@@ -4,16 +4,13 @@ services:
         container_name: distributedsystems_mariadb
         image: mariadb:latest
         volumes:
-           - ./script/create_db.sql:/docker-entrypoint-initdb.d/create_db.sql
            - ds_db_data:/var/lib/mysql
         restart: always
         ports:
            - "3306:3306"
         environment:
            MYSQL_ROOT_PASSWORD: root
-           MYSQL_DATABASE: testdb
-           MYSQL_USER: root
-           MYSQL_PASSWORD: root
+           MYSQL_DATABASE: ELENCO
     rabbitmq:
         container_name: distributedsystems_rabbitmq
         image: rabbitmq:3-management
