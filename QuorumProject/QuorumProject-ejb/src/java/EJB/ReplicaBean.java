@@ -24,6 +24,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.ejb.EJB;
+import javax.ejb.Schedule;
 import javax.ejb.Stateless;
 
 /**
@@ -32,28 +34,14 @@ import javax.ejb.Stateless;
  */
 @Stateless(name = "firstReplica")
 public class ReplicaBean implements ReplicaBeanLocal {
+
+    @EJB
+    private FaultDetectorLocal faultDetector;
     
     private VersionNumber num = new VersionNumber(0,1);
     
     private LinkedList<ElementQueue> queue = new LinkedList<>();
 
-    /*public ReplicaBean() {
-        try {
-            unserialize("replica1queue.dat");
-        } catch (IOException ex) {
-            Logger.getLogger(ReplicaBean.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }*/
-    
-    /*@PostConstruct
-    private void init() {
-        try {
-            unserialize("replica1queue.dat");
-        } catch (IOException ex) {
-            Logger.getLogger(ReplicaBean.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }*/
-    
     @Override
     public VersionNumber getNum() {
         return num;
@@ -102,7 +90,7 @@ public class ReplicaBean implements ReplicaBeanLocal {
     public void updateVersionNumber(int timestamp, Log l) {
         num.setTimestamp(timestamp);
         for(ElementQueue e : queue) {
-            if(e.getLog() == l) {
+            if(e.getLog().equals(l)) {
                 e.setConfirmed(true);
                 e.getNum().setTimestamp(timestamp);
                 System.out.println("sort");
@@ -145,13 +133,11 @@ public class ReplicaBean implements ReplicaBeanLocal {
     }
     
     @Override
-    public void unserialize(String string) throws IOException {
-        FileInputStream fin = null;
+    public void unserialize(String string) {
         ObjectInputStream ois = null;
         try {
-            fin = new FileInputStream(string);
-            ois = new ObjectInputStream(fin);
-            while (fin.available() > 0) {
+            ois = new ObjectInputStream(new FileInputStream(string));
+            while (ois.available() > 0) {
                 queue.add((ElementQueue) ois.readObject());
                 System.out.println("Mbare ho trovato un elemento");
             }
@@ -163,8 +149,46 @@ public class ReplicaBean implements ReplicaBeanLocal {
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(ReplicaBean.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
-            ois.close();
-            fin.close();
+            try {
+                if(ois!= null) ois.close();
+                //fin.close();
+            } catch (IOException ex) {
+                Logger.getLogger(ReplicaBean.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
+    }
+    
+    @Schedule(second="2", persistent = false)
+    public void atSchedule() {
+        ConnettoreMySQL connettore = new ConnettoreMySQL("3306");
+        if(connettore.testConnection(2)) {
+            faultDetector.receive(0);
+        }
+        try {
+            connettore.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(ReplicaBean.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    @Override
+    public boolean pingAckResponse() {
+        ConnettoreMySQL connettore = new ConnettoreMySQL("3306");
+        if(connettore.testConnection(5)) {
+            try {
+                connettore.close();
+            } catch (SQLException ex) {
+                //Logger.getLogger(ReplicaBean.class.getName()).log(Level.SEVERE, null, ex);
+                System.out.println("l");
+            }
+            return true;
+        }
+        try {
+            connettore.close();
+        } catch (SQLException ex) {
+            //Logger.getLogger(ReplicaBean.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("55");
+        }
+        return false;
     }
 }

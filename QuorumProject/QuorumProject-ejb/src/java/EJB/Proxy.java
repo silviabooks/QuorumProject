@@ -19,19 +19,26 @@ import javax.ejb.EJB;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
 import javax.ejb.Singleton;
+import javax.ejb.Startup;
 
 /**
  *
  * @author zartyuk
  */
 @Singleton
+@Startup
 public class Proxy implements ProxyLocal {
+
+    @EJB
+    private FaultDetectorLocal faultDetector;
 
     @EJB(beanName = "secondReplica")
     private ReplicaBeanLocal secondReplica;
 
     @EJB(beanName = "firstReplica")
     private ReplicaBeanLocal replicaBean;
+    
+    
     
     private ArrayList<ReplicaBeanLocal> replicas = new ArrayList<>();
     
@@ -44,7 +51,7 @@ public class Proxy implements ProxyLocal {
     private int quorumWrite = 2;
     
     @PostConstruct
-    public void init() {
+    private void init() {
         replicas.add(this.replicaBean);
         replicas.add(this.secondReplica);
         System.out.println("Added beans in List");
