@@ -1,78 +1,74 @@
 version: '2'
 services:
-    mariadb:
+    mariadb-1:
         container_name: distributedsystems_mariadb_1
         image: mariadb:latest
         volumes:
-           - ds_db_data:/var/lib/mysql
+           - ds_db_data_1:/var/lib/mysql
         restart: always
         ports:
            - "3306:3306"
         environment:
            MYSQL_ROOT_PASSWORD: root
-           MYSQL_DATABASE: testdb
-           MYSQL_USER: root
-           MYSQL_PASSWORD: root
-    mariadb:
+           MYSQL_DATABASE: ELENCO
+    mariadb-2:
         container_name: distributedsystems_mariadb_2
         image: mariadb:latest
         volumes:
-           - ds_db_data:/var/lib/mysql
+           - ds_db_data_2:/var/lib/mysql
         restart: always
         ports:
            - "3307:3306"
         environment:
            MYSQL_ROOT_PASSWORD: root
-           MYSQL_DATABASE: testdb
-           MYSQL_USER: root
-           MYSQL_PASSWORD: root
-    mariadb:
+           MYSQL_DATABASE: ELENCO
+    mariadb-3:
         container_name: distributedsystems_mariadb_3
         image: mariadb:latest
         volumes:
-           - ds_db_data:/var/lib/mysql
+           - ds_db_data_3:/var/lib/mysql
         restart: always
         ports:
            - "3308:3306"
         environment:
            MYSQL_ROOT_PASSWORD: root
-           MYSQL_DATABASE: testdb
-           MYSQL_USER: root
-           MYSQL_PASSWORD: root
-    mariadb:
+           MYSQL_DATABASE: ELENCO
+    mariadb-4:
         container_name: distributedsystems_mariadb_4
         image: mariadb:latest
         volumes:
-           - ds_db_data:/var/lib/mysql
+           - ds_db_data_4:/var/lib/mysql
         restart: always
         ports:
            - "3309:3306"
         environment:
            MYSQL_ROOT_PASSWORD: root
-           MYSQL_DATABASE: testdb
-           MYSQL_USER: root
-           MYSQL_PASSWORD: root
-    mariadb:
+           MYSQL_DATABASE: ELENCO
+    mariadb-5:
         container_name: distributedsystems_mariadb_5
         image: mariadb:latest
         volumes:
-           - ds_db_data:/var/lib/mysql
+           - ds_db_data_5:/var/lib/mysql
         restart: always
         ports:
            - "3310:3306"
         environment:
            MYSQL_ROOT_PASSWORD: root
-           MYSQL_DATABASE: testdb
-           MYSQL_USER: root
-           MYSQL_PASSWORD: root
+           MYSQL_DATABASE: ELENCO
     rabbitmq:
-        container_name: rabbitmq_queue
+        container_name: distributedsystems_rabbitmq
         image: rabbitmq:3-management
+        hostname: my-rabbit
         volumes:
-            - ds_db_data:/var/lib/mysql
+            - rabbitmq_data:/var/lib/rabbitmq
+        ports:
+            - "15672:15672"
+            - "5672:5672"
 volumes:
-    ds_db_data:
-    
-    
-    
-    mysql -u root -h 127.0.0.1 -P 3306 -proot -e "create database ELENCO; use ELENCO; create TABLE LOG(timestamp TIMESTAMP, idMacchina VARCHAR(255), message VARCHAR(255));"
+    ds_db_data_1:
+    ds_db_data_2:
+    ds_db_data_3:
+    ds_db_data_4:
+    ds_db_data_5:
+    rabbitmq_data:
+
