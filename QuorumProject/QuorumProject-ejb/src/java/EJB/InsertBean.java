@@ -23,10 +23,10 @@ public class InsertBean implements InsertBeanRemote {
     private ProxyLocal proxy;
     public boolean insertBean(Log log) {
         try {
-            proxy.writeResult(log);
+            return proxy.writeResult(log);
         } catch (SQLException ex) {
             Logger.getLogger(InsertBean.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return true;
+        return false;
     }
 }

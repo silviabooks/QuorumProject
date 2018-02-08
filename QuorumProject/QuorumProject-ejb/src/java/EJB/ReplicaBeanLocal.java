@@ -28,7 +28,5 @@ public interface ReplicaBeanLocal {
 
     public void updateVersionNumber(int timestamp, Log l);
 
-    public void unserialize(String string) throws IOException;
-
     public boolean pingAckResponse() throws SQLException;
 }

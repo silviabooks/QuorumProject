@@ -14,8 +14,7 @@ import javax.ejb.Local;
 @Local
 public interface FaultDetectorLocal {
 
-    public void receive(int i);
-
-    public void atSchedule();
+    public void receive(String s);
+    //public void receive(int i);
     
 }

@@ -16,10 +16,10 @@ import javax.ejb.Local;
 @Local
 public interface ProxyLocal {
 
-    public void example();
-
     public String readResult();
 
-    public void writeResult(Log l) throws SQLException;
+    public boolean writeResult(Log l) throws SQLException;
+
+    public void removeReplica(ReplicaBeanLocal b);
     
 }

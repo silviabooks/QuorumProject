@@ -43,9 +43,8 @@ public class RestAPI {
         Log log = new Gson().fromJson(l, Log.class);
         InsertBeanRemote insertBean = lookupInsertBeanRemote();
         
-        insertBean.insertBean(log);
-        
-        return "LOG AGGIUNTO";
+        if (insertBean.insertBean(log)) return "LOG AGGIUNTO";
+        else return "Problem in write!";
     }
 
     private ReadBeanRemote lookupReadBeanRemote() {

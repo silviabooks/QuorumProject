@@ -54,12 +54,7 @@ public class Proxy implements ProxyLocal {
     private void init() {
         replicas.add(this.replicaBean);
         replicas.add(this.secondReplica);
-        System.out.println("Added beans in List");
-        try {
-            replicaBean.unserialize("replica1queue.dat");
-        } catch (IOException ex) {
-            Logger.getLogger(Proxy.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        System.out.println("Iniziatilize array of Replicas in Proxy");
     }
     
     @Lock(LockType.READ)
@@ -83,7 +78,11 @@ public class Proxy implements ProxyLocal {
     }
     
     @Lock(LockType.WRITE)
-    public void writeResult(Log l) throws SQLException {
+    public boolean writeResult(Log l) throws SQLException {
+        if(replicas.size()<quorumWrite) {
+            System.out.println("I can't perform a read cause there is no sufficient replicas");
+            return false;
+        }
         Collections.shuffle(replicas);
         VersionNumber num = replicas.get(0).getNum();
         replicas.get(0).writeReplica(l);
@@ -97,9 +96,11 @@ public class Proxy implements ProxyLocal {
         for (int i=0; i<quorumWrite; i++) {
             replicas.get(i).updateVersionNumber(num.getTimestamp()+1, l);
         }
+        return true;
     }
     
-    public void example() {
-        System.out.println("Sono nel proxy");
+    public void removeReplica(ReplicaBeanLocal b) {
+        replicas.remove(b);
+        System.out.println(replicas.toString());
     }
 }

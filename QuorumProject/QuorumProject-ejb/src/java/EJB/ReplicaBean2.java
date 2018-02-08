@@ -63,9 +63,6 @@ public class ReplicaBean2 implements ReplicaBeanLocal {
     }
     
     @Override
-    public void unserialize(String string) throws IOException {}
-    
-    @Override
     public boolean pingAckResponse() throws SQLException {
         ConnettoreMySQL connettore = new ConnettoreMySQL("3306");
         if(connettore.testConnection(5)) {

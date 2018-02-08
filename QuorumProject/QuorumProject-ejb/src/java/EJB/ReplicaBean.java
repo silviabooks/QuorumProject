@@ -24,8 +24,10 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.ejb.Schedule;
+import javax.ejb.Startup;
 import javax.ejb.Stateless;
 
 /**
@@ -33,6 +35,7 @@ import javax.ejb.Stateless;
  * @author zartyuk
  */
 @Stateless(name = "firstReplica")
+@Startup
 public class ReplicaBean implements ReplicaBeanLocal {
 
     @EJB
@@ -41,6 +44,12 @@ public class ReplicaBean implements ReplicaBeanLocal {
     private VersionNumber num = new VersionNumber(0,1);
     
     private LinkedList<ElementQueue> queue = new LinkedList<>();
+    
+    @PostConstruct
+    private void init() {
+        System.out.println(this.toString() + " trying to find an existing queue");
+        unserialize("replica1queue.dat");
+    }
 
     @Override
     public VersionNumber getNum() {
@@ -112,15 +121,13 @@ public class ReplicaBean implements ReplicaBeanLocal {
     private void serialize(String string) throws IOException {
         //FileOutputStream fout = null;
         ObjectOutputStream oos = null;
-        System.out.println("Per adesso ok");
         try {
             //fout = new FileOutputStream(string);
             //System.out.println("ok ok");
             oos = new ObjectOutputStream(new FileOutputStream(string));
-            System.out.println("problem?");
             for (ElementQueue e : queue) {
                 oos.writeObject(e);
-                System.out.println("wow");
+                System.out.println("Saving a element in queue!");
             }
         } catch (FileNotFoundException ex) {
             Logger.getLogger(ReplicaBean.class.getName()).log(Level.SEVERE, null, ex);
@@ -132,15 +139,15 @@ public class ReplicaBean implements ReplicaBeanLocal {
         }
     }
     
-    @Override
-    public void unserialize(String string) {
+    private void unserialize(String string) {
         ObjectInputStream ois = null;
         try {
             ois = new ObjectInputStream(new FileInputStream(string));
             while (ois.available() > 0) {
                 queue.add((ElementQueue) ois.readObject());
-                System.out.println("Mbare ho trovato un elemento");
+                System.out.println("Found a element. Added to queue");
             }
+            if(ois.available() == 0) System.out.println("File found but is empty. Your queue will be empty!");
         } catch (FileNotFoundException ex) {
             System.out.println("File not found! Your queue will be empty!");
            // queue = new LinkedList<>();
@@ -158,11 +165,12 @@ public class ReplicaBean implements ReplicaBeanLocal {
         }
     }
     
-    @Schedule(second="2", persistent = false)
-    public void atSchedule() {
+    @Schedule(second="5/5", minute = "*", hour = "*", persistent = false)
+    private void sendHeartBeat() {
         ConnettoreMySQL connettore = new ConnettoreMySQL("3306");
         if(connettore.testConnection(2)) {
-            faultDetector.receive(0);
+            System.out.println(this.toString() + " sending HeartBeat");
+            faultDetector.receive("first");
         }
         try {
             connettore.close();
@@ -178,16 +186,9 @@ public class ReplicaBean implements ReplicaBeanLocal {
             try {
                 connettore.close();
             } catch (SQLException ex) {
-                //Logger.getLogger(ReplicaBean.class.getName()).log(Level.SEVERE, null, ex);
-                System.out.println("l");
+                Logger.getLogger(ReplicaBean.class.getName()).log(Level.SEVERE, null, ex);
             }
             return true;
-        }
-        try {
-            connettore.close();
-        } catch (SQLException ex) {
-            //Logger.getLogger(ReplicaBean.class.getName()).log(Level.SEVERE, null, ex);
-            System.out.println("55");
         }
         return false;
     }
