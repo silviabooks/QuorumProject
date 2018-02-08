@@ -43,7 +43,7 @@ public class Proxy implements ProxyLocal {
     private ArrayList<ReplicaBeanLocal> replicas = new ArrayList<>();
     
     /**
-     * Set the Quorum value for 5 replicas
+     * TODO Set the Quorum value for 5 replicas
      * Read = 2
      * Write = 4
      */

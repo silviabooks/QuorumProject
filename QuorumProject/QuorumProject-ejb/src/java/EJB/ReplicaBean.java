@@ -64,7 +64,9 @@ public class ReplicaBean implements ReplicaBeanLocal {
         ResultSet rs = connettore.doQuery(query);
         
         while(rs.next()){
-            logs.add(new Log(rs.getTimestamp("timestamp"), rs.getString("idMacchina"),rs.getString("message")));
+            logs.add(new Log(rs.getTimestamp("timestamp"), 
+                    rs.getString("idMacchina"),
+                    rs.getString("message")));
         }
         connettore.close();
         return new Gson().toJson(logs);
@@ -84,7 +86,8 @@ public class ReplicaBean implements ReplicaBeanLocal {
     }
     
     private void updateDatabase(Log l) throws SQLException {
-        String update = "INSERT INTO LOG VALUES(" + "\'" + l.getTimestamp() + "\'," + "\'" + l.getIdMacchina() + "\', "+ "\'" + l.getMessage() + "\'" +")";
+        String update = "INSERT INTO LOG VALUES(" + "\'" + l.getTimestamp() + "\'," 
+                + "\'" + l.getIdMacchina() + "\', "+ "\'" + l.getMessage() + "\'" +")";
         ConnettoreMySQL connettore = new ConnettoreMySQL("3306");
         connettore.doUpdate(update);
         connettore.close();
@@ -147,18 +150,17 @@ public class ReplicaBean implements ReplicaBeanLocal {
                 queue.add((ElementQueue) ois.readObject());
                 System.out.println("Found a element. Added to queue");
             }
-            if(ois.available() == 0) System.out.println("File found but is empty. Your queue will be empty!");
+            if(ois.available() == 0) 
+                System.out.println("File found but is empty. Your queue will be empty!");
         } catch (FileNotFoundException ex) {
             System.out.println("File not found! Your queue will be empty!");
-           // queue = new LinkedList<>();
-        } catch (IOException ex) {
-            Logger.getLogger(ReplicaBean.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ClassNotFoundException ex) {
+            // queue = new LinkedList<>();
+        } catch (IOException | ClassNotFoundException ex) {
             Logger.getLogger(ReplicaBean.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {
-                if(ois!= null) ois.close();
-                //fin.close();
+                if(ois != null) 
+                    ois.close();
             } catch (IOException ex) {
                 Logger.getLogger(ReplicaBean.class.getName()).log(Level.SEVERE, null, ex);
             }

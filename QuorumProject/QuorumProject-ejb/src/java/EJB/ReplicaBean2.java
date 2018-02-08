@@ -32,7 +32,9 @@ public class ReplicaBean2 implements ReplicaBeanLocal {
         ResultSet rs = connettore.doQuery(query);
         
         while(rs.next()){
-            logs.add(new Log(rs.getTimestamp("timestamp"), rs.getString("idMacchina"),rs.getString("message")));
+            logs.add(new Log(rs.getTimestamp("timestamp"), 
+                    rs.getString("idMacchina"),
+                    rs.getString("message")));
         }
         connettore.close();
         return new Gson().toJson(logs);
@@ -41,7 +43,8 @@ public class ReplicaBean2 implements ReplicaBeanLocal {
     @Override
     public void writeReplica(Log l) throws SQLException {
         System.out.println(l.getTimestamp().toString());
-        String update = "INSERT INTO LOG VALUES(" + "\'" + l.getTimestamp() + "\'," + "\'" + l.getIdMacchina() + "\', "+ "\'" + l.getMessage() + "\'" +")";
+        String update = "INSERT INTO LOG VALUES(" + "\'" + l.getTimestamp() + "\'," + 
+                "\'" + l.getIdMacchina() + "\', "+ "\'" + l.getMessage() + "\'" +")";
         ConnettoreMySQL connettore = new ConnettoreMySQL("3306");
         connettore.doUpdate(update);
         connettore.close();

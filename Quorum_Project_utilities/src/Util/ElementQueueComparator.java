@@ -19,7 +19,8 @@ public class ElementQueueComparator implements Comparator<ElementQueue> {
     @Override
     public int compare(ElementQueue o1, ElementQueue o2) {
         int timestampCmp = o1.getNum().getTimestamp().compareTo(o2.getNum().getTimestamp());
-        if(timestampCmp != 0) return timestampCmp;
+        if(timestampCmp != 0) 
+            return timestampCmp;
         return o1.getNum().getId().compareTo(o2.getNum().getId());
     }
     

@@ -28,6 +28,8 @@ import javax.ws.rs.core.MediaType;
 @Path("/log")
 public class RestAPI {
     
+    private static final String BEAN_ENDPOINT = "java:global/QuorumProject/QuorumProject-ejb/";
+    
     @GET
     @Path("/get")
     @Produces(MediaType.TEXT_PLAIN)
@@ -50,7 +52,7 @@ public class RestAPI {
     private ReadBeanRemote lookupReadBeanRemote() {
         try {
             Context c = new InitialContext();
-            return (ReadBeanRemote) c.lookup("java:global/QuorumProject/QuorumProject-ejb/ReadBean!EJB.ReadBeanRemote");
+            return (ReadBeanRemote) c.lookup(BEAN_ENDPOINT + "ReadBean!EJB.ReadBeanRemote");
         } catch (NamingException ne) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, "exception caught", ne);
             throw new RuntimeException(ne);
@@ -60,7 +62,7 @@ public class RestAPI {
     private InsertBeanRemote lookupInsertBeanRemote() {
         try {
             Context c = new InitialContext();
-            return (InsertBeanRemote) c.lookup("java:global/QuorumProject/QuorumProject-ejb/InsertBean!EJB.InsertBeanRemote");
+            return (InsertBeanRemote) c.lookup(BEAN_ENDPOINT + "InsertBean!EJB.InsertBeanRemote");
         } catch (NamingException ne) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, "exception caught", ne);
             throw new RuntimeException(ne);

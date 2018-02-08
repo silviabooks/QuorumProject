@@ -37,7 +37,8 @@ public class FaultDetector implements FaultDetectorLocal {
     
     //private boolean[] response = new boolean[2]; //Syncronize me
     
-    private ConcurrentHashMap<ReplicaBeanLocal, ArrayList<Boolean>> myMap = new ConcurrentHashMap<ReplicaBeanLocal, ArrayList<Boolean>>();;
+    private ConcurrentHashMap<ReplicaBeanLocal, ArrayList<Boolean>> myMap =
+            new ConcurrentHashMap<ReplicaBeanLocal, ArrayList<Boolean>>();
 
     //private ArrayList<ReplicaBeanLocal> replicas = new ArrayList<>();
     
