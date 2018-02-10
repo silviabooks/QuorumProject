@@ -6,7 +6,6 @@
 package EJB;
 
 import Util.Log;
-import java.sql.SQLException;
 import javax.ejb.Local;
 
 /**
@@ -18,7 +17,7 @@ public interface ProxyLocal {
 
     public String readResult();
 
-    public boolean writeResult(Log l) throws SQLException;
+    public boolean writeResult(Log l);
 
     public void removeReplica(ReplicaBeanLocal b);
     

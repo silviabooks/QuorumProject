@@ -24,11 +24,9 @@ public class ConnettoreMySQL {
     public ConnettoreMySQL(String port) {
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            //DriverManager.setLoginTimeout(5);
             connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:" + port + "/ELENCO", "root", "root");
             
         } catch (ClassNotFoundException | SQLException ex) {
-            //Logger.getLogger(ConnettoreMySQL.class.getName()).log(Level.INFO, null, ex);
             System.err.println("CONNESSIONE FALLITA " + port);
         }
     }
@@ -48,16 +46,15 @@ public class ConnettoreMySQL {
         return stm.executeQuery(query);
     }
     
-    public boolean doUpdate(String update){
+    public boolean doUpdate(String update) {
         Statement stm = null;
         try {
             stm = connection.createStatement();
             stm.executeUpdate(update);
             return true;
         } catch (SQLException ex) {
-            Logger.getLogger(ConnettoreMySQL.class.getName()).log(Level.INFO, null, ex);
-            System.err.println("UPDATE failed: " + update);
-        } finally{
+            System.out.println("Write failed: " + update);
+        } finally {
             if(stm != null) try {
                 stm.close();
             } catch (SQLException ex) {
@@ -68,7 +65,11 @@ public class ConnettoreMySQL {
         return false;
     }
     
-    public void close() throws SQLException{
-        if(connection != null && !connection.isClosed()) connection.close();
+    public void close() {
+         try {
+             if(connection != null && !connection.isClosed()) connection.close();
+         } catch (SQLException ex) {
+             Logger.getLogger(ConnettoreMySQL.class.getName()).log(Level.SEVERE, null, ex);
+         }
     }
 }

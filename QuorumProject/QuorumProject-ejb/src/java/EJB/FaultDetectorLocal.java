@@ -15,6 +15,5 @@ import javax.ejb.Local;
 public interface FaultDetectorLocal {
 
     public void receive(String s);
-    //public void receive(int i);
     
 }

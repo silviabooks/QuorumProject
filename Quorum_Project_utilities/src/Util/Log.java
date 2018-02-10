@@ -52,6 +52,6 @@ public class Log implements Serializable {
         
     @Override
     public String toString() {
-        return "Log{" + "timestamp=" + timestamp + ", idMacchina=" + idMacchina + ", message=" + message + '}';
+        return "Log {" + "timestamp = " + timestamp + ", idMacchina = " + idMacchina + ", message = " + message + '}';
     }
 }

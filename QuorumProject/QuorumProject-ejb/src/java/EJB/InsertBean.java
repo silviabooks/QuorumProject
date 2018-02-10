@@ -6,9 +6,6 @@
 package EJB;
 
 import Util.Log;
-import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 
@@ -22,11 +19,6 @@ public class InsertBean implements InsertBeanRemote {
     @EJB
     private ProxyLocal proxy;
     public boolean insertBean(Log log) {
-        try {
-            return proxy.writeResult(log);
-        } catch (SQLException ex) {
-            Logger.getLogger(InsertBean.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return false;
+        return proxy.writeResult(log);
     }
 }

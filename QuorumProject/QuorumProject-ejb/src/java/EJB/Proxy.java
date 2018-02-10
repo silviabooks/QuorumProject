@@ -5,16 +5,17 @@
  */
 package EJB;
 
-import Util.ElementQueueComparator;
 import Util.Log;
 import Util.VersionNumber;
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
+import javax.ejb.ConcurrencyManagement;
+import javax.ejb.ConcurrencyManagementType;
 import javax.ejb.EJB;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
@@ -27,10 +28,8 @@ import javax.ejb.Startup;
  */
 @Singleton
 @Startup
+@ConcurrencyManagement(ConcurrencyManagementType.CONTAINER)
 public class Proxy implements ProxyLocal {
-
-    @EJB
-    private FaultDetectorLocal faultDetector;
 
     @EJB(beanName = "secondReplica")
     private ReplicaBeanLocal secondReplica;
@@ -38,27 +37,41 @@ public class Proxy implements ProxyLocal {
     @EJB(beanName = "firstReplica")
     private ReplicaBeanLocal replicaBean;
     
+    @EJB(beanName = "thirdReplica")
+    private ReplicaBeanLocal thirdReplica;
     
+    @EJB(beanName = "fourthReplica")
+    private ReplicaBeanLocal fourthReplica;
     
-    private ArrayList<ReplicaBeanLocal> replicas = new ArrayList<>();
+    @EJB(beanName = "fifthReplica")
+    private ReplicaBeanLocal fifthReplica;
+     
+    private List<ReplicaBeanLocal> replicas = Collections.synchronizedList(new ArrayList<>());
     
     /**
-     * TODO Set the Quorum value for 5 replicas
+     * Set the Quorum value for 5 replicas
      * Read = 2
      * Write = 4
      */
-    private int quorumRead = 1;
-    private int quorumWrite = 2;
+    private int quorumRead = 2;
+    private int quorumWrite = 4;
     
     @PostConstruct
     private void init() {
         replicas.add(this.replicaBean);
         replicas.add(this.secondReplica);
-        System.out.println("Iniziatilize array of Replicas in Proxy");
+        replicas.add(this.thirdReplica);
+        replicas.add(this.fourthReplica);
+        replicas.add(this.fifthReplica);
+        System.out.println("Iniziatilize Replicas in Proxy");
     }
     
     @Lock(LockType.READ)
     public String readResult() {
+        if(replicas.size()<quorumRead) {
+            System.out.println("I can't perform a read cause there are no sufficient replicas");
+            return null;
+        }
         Collections.shuffle(replicas);
         ReplicaBeanLocal aux = replicas.get(0);
         for (int i=1; i<quorumRead; i++) {
@@ -67,7 +80,6 @@ public class Proxy implements ProxyLocal {
                 if(replicas.get(i).getNum().getId() > aux.getNum().getId()) aux = replicas.get(i);
             }
         }
-        aux.test();
         try {
             return aux.readReplica();
         } catch (SQLException ex) {
@@ -78,9 +90,9 @@ public class Proxy implements ProxyLocal {
     }
     
     @Lock(LockType.WRITE)
-    public boolean writeResult(Log l) throws SQLException {
+    public boolean writeResult(Log l) {
         if(replicas.size()<quorumWrite) {
-            System.out.println("I can't perform a read cause there is no sufficient replicas");
+            System.out.println("I can't perform a write cause there are no sufficient replicas");
             return false;
         }
         Collections.shuffle(replicas);

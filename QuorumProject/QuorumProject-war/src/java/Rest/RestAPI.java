@@ -35,7 +35,9 @@ public class RestAPI {
     @Produces(MediaType.TEXT_PLAIN)
     public String showLog() {
         ReadBeanRemote readBean = lookupReadBeanRemote();
-        return readBean.readBean();
+        String aux = readBean.readBean();
+        if(aux!=null) return aux;
+        else return("Problem in read. Can't reach read quorum!");
     }
     
     @POST
@@ -46,7 +48,7 @@ public class RestAPI {
         InsertBeanRemote insertBean = lookupInsertBeanRemote();
         
         if (insertBean.insertBean(log)) return "LOG AGGIUNTO";
-        else return "Problem in write!";
+        else return "Problem in write. Can't reach write quorum!";
     }
 
     private ReadBeanRemote lookupReadBeanRemote() {

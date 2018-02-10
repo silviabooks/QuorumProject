@@ -34,20 +34,20 @@ import javax.ejb.Stateless;
  *
  * @author zartyuk
  */
-@Stateless(name = "secondReplica")
-public class ReplicaBean2 implements ReplicaBeanLocal {
+@Stateless(name = "thirdReplica")
+public class ReplicaBean3 implements ReplicaBeanLocal {
 
     @EJB
     private FaultDetectorLocal faultDetector;
     
-    private VersionNumber num = new VersionNumber(0,2);
+    private VersionNumber num = new VersionNumber(0,3);
     
     private List<ElementQueue> queue = Collections.synchronizedList(new LinkedList<>());
     
     @PostConstruct
     private void init() {
         System.out.println(this.toString() + " trying to find an existing queue");
-        unserialize("replica2queue.dat");
+        unserialize("replica3queue.dat");
     }
     
     @Override
@@ -59,7 +59,7 @@ public class ReplicaBean2 implements ReplicaBeanLocal {
     public String readReplica() throws SQLException {
         ArrayList<Log> logs = new ArrayList<>();
         String query = "SELECT * FROM LOG";
-        ConnettoreMySQL connettore = new ConnettoreMySQL("3307");
+        ConnettoreMySQL connettore = new ConnettoreMySQL("3308");
         ResultSet rs = connettore.doQuery(query);
         
         while(rs.next()){
@@ -70,19 +70,19 @@ public class ReplicaBean2 implements ReplicaBeanLocal {
         connettore.close();
         return new Gson().toJson(logs);
     }
-
+    
     @Override
     public void writeReplica(Log l) {
         queue.add(new ElementQueue(num, l, false));
         Collections.sort(queue, new ElementQueueComparator());
         System.out.println(queue.toString());
-        serialize("replica2queue.dat");
+        serialize("replica3queue.dat");
     }
     
     private void updateDatabase(Log l) {
         String update = "INSERT INTO LOG VALUES(" + "\'" + l.getTimestamp() + "\'," 
                 + "\'" + l.getIdMacchina() + "\', "+ "\'" + l.getMessage() + "\'" +")";
-        ConnettoreMySQL connettore = new ConnettoreMySQL("3307");
+        ConnettoreMySQL connettore = new ConnettoreMySQL("3308");
         connettore.doUpdate(update);
         connettore.close();
     }
@@ -106,14 +106,14 @@ public class ReplicaBean2 implements ReplicaBeanLocal {
             }
         }
     }
-
+    
     private void serialize(String string) {
         ObjectOutputStream oos = null;
         try {
             oos = new ObjectOutputStream(new FileOutputStream(string));
             for (ElementQueue e : queue) {
                 oos.writeObject(e);
-                System.out.println("Saving a element in replica2queue!");
+                System.out.println("Saving a element in replica3queue!");
             }
         } catch (FileNotFoundException ex) {
             Logger.getLogger(ReplicaBean.class.getName()).log(Level.SEVERE, null, ex);
@@ -135,12 +135,12 @@ public class ReplicaBean2 implements ReplicaBeanLocal {
             ois = new ObjectInputStream(new FileInputStream(string));
             while (ois.available() > 0) {
                 queue.add((ElementQueue) ois.readObject());
-                System.out.println("Found a element. Added to replica2queue");
+                System.out.println("Found a element. Added to replica3queue");
             }
             if(ois.available() == 0) 
-                System.out.println("File found but is empty. Your replica2queue will be empty!");
+                System.out.println("File found but is empty. Your replica3queue will be empty!");
         } catch (FileNotFoundException ex) {
-            System.out.println("File not found! Your replica2queue will be empty!");
+            System.out.println("File not found! Your replica3queue will be empty!");
         } catch (IOException | ClassNotFoundException ex) {
             Logger.getLogger(ReplicaBean.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
@@ -155,17 +155,17 @@ public class ReplicaBean2 implements ReplicaBeanLocal {
     
     @Schedule(second="5/5", minute = "*", hour = "*", persistent = false)
     private void sendHeartBeat() {
-        ConnettoreMySQL connettore = new ConnettoreMySQL("3307");
+        ConnettoreMySQL connettore = new ConnettoreMySQL("3308");
         if(connettore.testConnection(2)) {
             System.out.println(this.toString() + " sending HeartBeat");
-            faultDetector.receive("second");
+            faultDetector.receive("third");
         }
         connettore.close();
     }
     
     @Override
     public boolean pingAckResponse() {
-        ConnettoreMySQL connettore = new ConnettoreMySQL("3307");
+        ConnettoreMySQL connettore = new ConnettoreMySQL("3308");
         if(connettore.testConnection(5)) {
             connettore.close();
             return true;

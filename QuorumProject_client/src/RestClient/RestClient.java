@@ -25,6 +25,7 @@ public class RestClient {
      */
     public static void main(String[] args) {
         Client client = Client.create();
+        for(int i = 0; i<20; i++) {
         Date date = new Date();
         Log log = new Log(new java.sql.Timestamp(date.getTime()) ,"prova", 
                 "spero funzioni");
@@ -34,6 +35,7 @@ public class RestClient {
         ClientResponse rispostaPost = webResourcePost
                 .post(ClientResponse.class, string);
         System.out.println(rispostaPost.getEntity(String.class));
+        }
         
         WebResource webResource = client.resource(ENDPOINT + "get");
         ClientResponse rispostaGet = webResource.get(ClientResponse.class);

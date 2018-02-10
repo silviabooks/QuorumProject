@@ -22,12 +22,12 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.ejb.Schedule;
-import javax.ejb.Startup;
 import javax.ejb.Stateless;
 
 /**
@@ -35,7 +35,6 @@ import javax.ejb.Stateless;
  * @author zartyuk
  */
 @Stateless(name = "firstReplica")
-@Startup
 public class ReplicaBean implements ReplicaBeanLocal {
 
     @EJB
@@ -43,7 +42,7 @@ public class ReplicaBean implements ReplicaBeanLocal {
     
     private VersionNumber num = new VersionNumber(0,1);
     
-    private LinkedList<ElementQueue> queue = new LinkedList<>();
+    private List<ElementQueue> queue = Collections.synchronizedList(new LinkedList<>());
     
     @PostConstruct
     private void init() {
@@ -74,28 +73,18 @@ public class ReplicaBean implements ReplicaBeanLocal {
     
     @Override
     public void writeReplica(Log l) {
-        System.out.println(l.getTimestamp().toString());
         queue.add(new ElementQueue(num, l, false));
         Collections.sort(queue, new ElementQueueComparator());
         System.out.println(queue.toString());
-        try {
-            serialize("replica1queue.dat");
-        } catch (IOException ex) {
-            Logger.getLogger(ReplicaBean.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        serialize("replica1queue.dat");
     }
     
-    private void updateDatabase(Log l) throws SQLException {
+    private void updateDatabase(Log l) {
         String update = "INSERT INTO LOG VALUES(" + "\'" + l.getTimestamp() + "\'," 
                 + "\'" + l.getIdMacchina() + "\', "+ "\'" + l.getMessage() + "\'" +")";
         ConnettoreMySQL connettore = new ConnettoreMySQL("3306");
         connettore.doUpdate(update);
         connettore.close();
-    }
-    
-    @Override
-    public void test() {
-        System.out.println("Sono la prima replica");
     }
     
     @Override
@@ -105,40 +94,38 @@ public class ReplicaBean implements ReplicaBeanLocal {
             if(e.getLog().equals(l)) {
                 e.setConfirmed(true);
                 e.getNum().setTimestamp(timestamp);
-                System.out.println("sort");
             }
         }
         Collections.sort(queue, new ElementQueueComparator());
-        if(queue.peek().isConfirmed() == true) {
+        if(queue.get(0).isConfirmed() == true) {
             for (ElementQueue e : queue) {
-                if(e.isConfirmed() == true) try {
+                if(e.isConfirmed() == true) {
                     updateDatabase(e.getLog());
                     queue.remove(e);
-                } catch (SQLException ex) {
-                    Logger.getLogger(ReplicaBean.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }
     }
     
-    private void serialize(String string) throws IOException {
-        //FileOutputStream fout = null;
+    private void serialize(String string) {
         ObjectOutputStream oos = null;
         try {
-            //fout = new FileOutputStream(string);
-            //System.out.println("ok ok");
             oos = new ObjectOutputStream(new FileOutputStream(string));
             for (ElementQueue e : queue) {
                 oos.writeObject(e);
-                System.out.println("Saving a element in queue!");
+                System.out.println("Saving a element in replica1queue!");
             }
         } catch (FileNotFoundException ex) {
             Logger.getLogger(ReplicaBean.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(ReplicaBean.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
-            oos.close();
-            //fout.close();
+            if(oos != null)
+                try {
+                    oos.close();
+            } catch (IOException ex) {
+                Logger.getLogger(ReplicaBean.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
     
@@ -148,13 +135,12 @@ public class ReplicaBean implements ReplicaBeanLocal {
             ois = new ObjectInputStream(new FileInputStream(string));
             while (ois.available() > 0) {
                 queue.add((ElementQueue) ois.readObject());
-                System.out.println("Found a element. Added to queue");
+                System.out.println("Found a element. Added to replica1queue");
             }
             if(ois.available() == 0) 
-                System.out.println("File found but is empty. Your queue will be empty!");
+                System.out.println("File found but is empty. Your replica1queue will be empty!");
         } catch (FileNotFoundException ex) {
-            System.out.println("File not found! Your queue will be empty!");
-            // queue = new LinkedList<>();
+            System.out.println("File not found! Your replica1queue will be empty!");
         } catch (IOException | ClassNotFoundException ex) {
             Logger.getLogger(ReplicaBean.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
@@ -174,22 +160,14 @@ public class ReplicaBean implements ReplicaBeanLocal {
             System.out.println(this.toString() + " sending HeartBeat");
             faultDetector.receive("first");
         }
-        try {
-            connettore.close();
-        } catch (SQLException ex) {
-            Logger.getLogger(ReplicaBean.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        connettore.close();
     }
     
     @Override
     public boolean pingAckResponse() {
         ConnettoreMySQL connettore = new ConnettoreMySQL("3306");
         if(connettore.testConnection(5)) {
-            try {
-                connettore.close();
-            } catch (SQLException ex) {
-                Logger.getLogger(ReplicaBean.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            connettore.close();
             return true;
         }
         return false;
