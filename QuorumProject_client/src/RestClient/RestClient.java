@@ -27,8 +27,8 @@ public class RestClient {
         Client client = Client.create();
         for(int i = 0; i<20; i++) {
         Date date = new Date();
-        Log log = new Log(new java.sql.Timestamp(date.getTime()) ,"prova", 
-                "spero funzioni");
+        Log log = new Log(new java.sql.Timestamp(date.getTime()) ,"prova" + i, 
+                "spero funzioni" + i);
         System.out.println(log.toString());
         String string = new Gson().toJson(log);
         WebResource webResourcePost = client.resource(ENDPOINT + "post");

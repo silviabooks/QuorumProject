@@ -21,11 +21,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.ejb.Schedule;
 import javax.ejb.Stateless;
@@ -40,19 +40,28 @@ public class ReplicaBean2 implements ReplicaBeanLocal {
     @EJB
     private FaultDetectorLocal faultDetector;
     
-    private VersionNumber num = new VersionNumber(0,2);
+    private static VersionNumber num;
     
-    private List<ElementQueue> queue = Collections.synchronizedList(new LinkedList<>());
+    private static List<ElementQueue> queue = Collections.synchronizedList(new LinkedList<>());
     
-    @PostConstruct
-    private void init() {
+    @Override
+    public void init() {
+        this.num = new VersionNumber(0,2);
         System.out.println(this.toString() + " trying to find an existing queue");
         unserialize("replica2queue.dat");
     }
     
     @Override
     public VersionNumber getNum() {
-        return num;
+        //ConnettoreMySQL connettore = new ConnettoreMySQL("3307");
+        //if(connettore.testConnection(2)) {
+        //    connettore.close();
+            return this.num;
+        //}
+        //else {
+        //    connettore.close();
+        //    return null;
+        //}
     }
     
     @Override
@@ -73,10 +82,14 @@ public class ReplicaBean2 implements ReplicaBeanLocal {
 
     @Override
     public void writeReplica(Log l) {
-        queue.add(new ElementQueue(num, l, false));
+        queue.add(new ElementQueue(this.num, l, false));
+        this.num.setTimestamp(this.num.getTimestamp()+1);
         Collections.sort(queue, new ElementQueueComparator());
-        System.out.println(queue.toString());
-        serialize("replica2queue.dat");
+        Iterator<ElementQueue> iter = queue.iterator();
+        while (iter.hasNext()) {
+            ElementQueue e = iter.next();
+            System.out.print("Element in replica2queue: " + e.getLog().toString() + " " + e.isConfirmed() + " " + e.getNum().getTimestamp());
+        }
     }
     
     private void updateDatabase(Log l) {
@@ -88,32 +101,61 @@ public class ReplicaBean2 implements ReplicaBeanLocal {
     }
     
     @Override
-    public void updateVersionNumber(int timestamp, Log l) {
-        num.setTimestamp(timestamp);
-        for(ElementQueue e : queue) {
+    public void restoreConsistency(Log l) {
+        String delete = "DELETE FROM LOG WHERE timestamp = " + "\'" + l.getTimestamp() + "\' AND idMacchina = " 
+                + "\'" + l.getIdMacchina() + "\' AND message = "+ "\'" + l.getMessage() + "\'";
+        ConnettoreMySQL connettore = new ConnettoreMySQL("3307");
+        connettore.doUpdate(delete);
+        connettore.close();
+    }
+    
+    @Override
+    public void updateVersionNumber(VersionNumber vn, Log l) {
+        Iterator<ElementQueue> iter = queue.iterator();
+        while (iter.hasNext()) {
+            ElementQueue e = iter.next();
             if(e.getLog().equals(l)) {
                 e.setConfirmed(true);
-                e.getNum().setTimestamp(timestamp);
+                e.setNum(vn);
+                break;
             }
         }
         Collections.sort(queue, new ElementQueueComparator());
-        if(queue.get(0).isConfirmed() == true) {
-            for (ElementQueue e : queue) {
-                if(e.isConfirmed() == true) {
-                    updateDatabase(e.getLog());
-                    queue.remove(e);
+        serialize("replica2queue.dat");
+        if(this.num.getTimestamp() < vn.getTimestamp()) this.num.setTimestamp(vn.getTimestamp());
+    }
+    
+    @Override
+    public boolean commit() {
+        if(!queue.isEmpty() && queue.get(0).isConfirmed() == true) {
+            Iterator<ElementQueue> ite = queue.iterator();
+            while (ite.hasNext()) {
+                ElementQueue e = ite.next();
+                if(e.isConfirmed()) {
+                        try {
+                        updateDatabase(e.getLog());
+                        ite.remove();
+                        }
+                        catch (RuntimeException ex) {
+                            System.out.println("Problem in storing content. " + this.toString() + " down");
+                            return false;
+                        }
                 }
+                else break;
             }
         }
+        serialize("replica2queue.dat");
+        return true;
     }
 
     private void serialize(String string) {
         ObjectOutputStream oos = null;
         try {
             oos = new ObjectOutputStream(new FileOutputStream(string));
-            for (ElementQueue e : queue) {
-                oos.writeObject(e);
-                System.out.println("Saving a element in replica2queue!");
+            oos.writeInt(queue.size());
+            Iterator<ElementQueue> iter = queue.iterator();
+            while (iter.hasNext()) {
+                oos.writeObject(iter.next());
             }
         } catch (FileNotFoundException ex) {
             Logger.getLogger(ReplicaBean.class.getName()).log(Level.SEVERE, null, ex);
@@ -133,12 +175,12 @@ public class ReplicaBean2 implements ReplicaBeanLocal {
         ObjectInputStream ois = null;
         try {
             ois = new ObjectInputStream(new FileInputStream(string));
-            while (ois.available() > 0) {
+            int y = ois.readInt();
+            while(y!=0) {
                 queue.add((ElementQueue) ois.readObject());
                 System.out.println("Found a element. Added to replica2queue");
+                --y;
             }
-            if(ois.available() == 0) 
-                System.out.println("File found but is empty. Your replica2queue will be empty!");
         } catch (FileNotFoundException ex) {
             System.out.println("File not found! Your replica2queue will be empty!");
         } catch (IOException | ClassNotFoundException ex) {
@@ -153,7 +195,7 @@ public class ReplicaBean2 implements ReplicaBeanLocal {
         }
     }
     
-    @Schedule(second="5/5", minute = "*", hour = "*", persistent = false)
+    @Schedule(second="1/1", minute = "*", hour = "*", persistent = false)
     private void sendHeartBeat() {
         ConnettoreMySQL connettore = new ConnettoreMySQL("3307");
         if(connettore.testConnection(2)) {

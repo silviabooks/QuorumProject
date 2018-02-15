@@ -13,21 +13,21 @@ import java.io.Serializable;
  */
 public class VersionNumber implements Serializable {
     
-    private Integer timestamp;
-    private Integer id;
+    private int timestamp;
+    private int id;
     
-    public VersionNumber(Integer timestamp, Integer id) {
+    public VersionNumber(int timestamp, int id) {
         this.id = id;
         this.timestamp = timestamp;
     }
 
     public VersionNumber() {}
 
-    public Integer getId() {
+    public int getId() {
         return id;
     }
 
-    public Integer getTimestamp() {
+    public int getTimestamp() {
         return timestamp;
     }
 

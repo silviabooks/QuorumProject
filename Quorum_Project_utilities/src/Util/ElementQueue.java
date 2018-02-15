@@ -37,4 +37,8 @@ public class ElementQueue implements Serializable {
     public void setConfirmed(boolean confirmed) {
         this.confirmed = confirmed;
     }
+
+    public void setNum(VersionNumber num) {
+        this.num = num;
+    }
 }

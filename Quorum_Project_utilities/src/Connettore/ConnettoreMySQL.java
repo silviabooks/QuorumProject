@@ -40,7 +40,7 @@ public class ConnettoreMySQL {
          return false;
     }
     
-    public ResultSet doQuery(String query) throws SQLException{
+    public ResultSet doQuery(String query) throws SQLException {
         Statement stm = connection.createStatement();
         
         return stm.executeQuery(query);
@@ -53,7 +53,7 @@ public class ConnettoreMySQL {
             stm.executeUpdate(update);
             return true;
         } catch (SQLException ex) {
-            System.out.println("Write failed: " + update);
+            System.out.println("Update failed: " + update);
         } finally {
             if(stm != null) try {
                 stm.close();

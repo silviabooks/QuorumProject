@@ -60,6 +60,7 @@ public class FaultDetector implements FaultDetectorLocal {
         System.out.println(replicas.toString());
     }
     
+    @Override
     public void receive(String s) {
         switch(s) {
             case "first": if(replicas.get(firstReplica).get(1).booleanValue() == true) {
@@ -85,7 +86,7 @@ public class FaultDetector implements FaultDetectorLocal {
         }
     }
     
-    @Schedule(second="12/12", minute = "*", hour = "*", persistent = false)
+    @Schedule(second="5/5", minute = "*", hour = "*", persistent = false)
     private void verifyReplicas() {
         for(Map.Entry<ReplicaBeanLocal, ArrayList<Boolean>> entry : replicas.entrySet()) {
             if(entry.getValue().get(0).booleanValue() == false && entry.getValue().get(1).booleanValue() == true) {

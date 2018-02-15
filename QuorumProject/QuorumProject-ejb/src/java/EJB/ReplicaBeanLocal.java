@@ -23,7 +23,13 @@ public interface ReplicaBeanLocal {
 
     public VersionNumber getNum();
 
-    public void updateVersionNumber(int timestamp, Log l);
+    public void updateVersionNumber(VersionNumber num, Log l);
 
     public boolean pingAckResponse();
+
+    public void init();
+
+    public void restoreConsistency(Log l);
+
+    public boolean commit();
 }
