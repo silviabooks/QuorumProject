@@ -106,6 +106,7 @@ public class ReplicaBean2 implements ReplicaBeanLocal {
     
     @Override
     public void restoreConsistency(Log l) {
+        // TODO aggiungere verifica connettore
         String delete = "DELETE FROM LOG WHERE timestamp = " + "\'" + 
                 l.getTimestamp() + "\' AND idMacchina = " + "\'" + 
                 l.getIdMacchina() + "\' AND message = "+ "\'" + 

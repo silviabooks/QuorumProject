@@ -50,9 +50,7 @@ public class Proxy implements ProxyLocal {
     private List<ReplicaBeanLocal> replicas = Collections.synchronizedList(new ArrayList<>());
     
     private List<ReplicaBeanLocal> writeReplica = new ArrayList<>();
-    
-    private Counter counter;
-   
+       
     /**
      * Set the Quorum value for 5 replicas
      * Read = 2
@@ -68,7 +66,6 @@ public class Proxy implements ProxyLocal {
         thirdReplica.init();
         fourthReplica.init();
         fifthReplica.init();
-        counter = new Counter();
         replicas.add(this.replicaBean);
         replicas.add(this.secondReplica);
         replicas.add(this.thirdReplica);
@@ -80,7 +77,7 @@ public class Proxy implements ProxyLocal {
     @Lock(LockType.READ)
     @Override
     public String readResult() {
-        if(replicas.size()<quorumRead) {
+        if(replicas.size() < quorumRead) {
             System.out.println("I can't perform a read cause there are no sufficient replicas");
             return null;
         }
@@ -108,17 +105,23 @@ public class Proxy implements ProxyLocal {
     @Lock(LockType.WRITE)
     @Override
     public boolean writeResult(Log l) {
-        if(replicas.size()<quorumWrite) {
+        // if two or more replicas are down, the quorum is not reached
+        if(replicas.size() < quorumWrite) {
             System.out.println("I can't perform a write cause there are no sufficient replicas");
             return false;
         }
         VersionNumber num = new VersionNumber(-1,0);
-        for (int i=0; i<replicas.size(); i++) {
-            if (replicas.get(i).getNum() != null && replicas.get(i).getNum().getTimestamp() > num.getTimestamp()) {
+        Counter counter = new Counter();
+        
+        for (int i = 0; i < replicas.size(); i++) {
+            if (replicas.get(i).getNum() != null && 
+                    replicas.get(i).getNum().getTimestamp() > num.getTimestamp()) {
                 num = replicas.get(i).getNum();
             }
-            else if(replicas.get(i).getNum()!= null && replicas.get(i).getNum().getTimestamp() == num.getTimestamp()) {
-                if(replicas.get(i).getNum()!= null && replicas.get(i).getNum().getId() > num.getId()) {
+            else if(replicas.get(i).getNum()!= null && 
+                    replicas.get(i).getNum().getTimestamp() == num.getTimestamp()) {
+                if(replicas.get(i).getNum()!= null && 
+                        replicas.get(i).getNum().getId() > num.getId()) {
                     num = replicas.get(i).getNum();
                 }
             }
@@ -127,24 +130,33 @@ public class Proxy implements ProxyLocal {
                 writeReplica.add(replicas.get(i));
             }
         }
-        for (int i=0; i<writeReplica.size(); i++) writeReplica.get(i).updateVersionNumber(num, l);
+        for (int i=0; i < writeReplica.size(); i++) 
+            writeReplica.get(i).updateVersionNumber(num, l);
+        
         boolean[] verifyQuorum = new boolean[writeReplica.size()];
+        
         for (int i=0; i<writeReplica.size(); i++) {
             verifyQuorum[i] = writeReplica.get(i).commit();
         }
         for (int i=0; i<writeReplica.size(); i++) {
-            if(verifyQuorum[i] == true) counter.increment(); 
+            if(verifyQuorum[i] == true) 
+                counter.setValue(counter.getValue() + 1);
+            System.out.println("contatore: " + counter.getValue());
         }
-        System.out.println("contatore corrente: " + counter.getValue());
-        if(counter.getValue() < quorumWrite) {
+        System.out.println("contatore corrente: " + counter.getValue());        
+        if((counter.getValue() % 5) != 0 && (counter.getValue() % 5) < quorumWrite) {
             for(int j = 0; j<writeReplica.size(); j++) {
                 writeReplica.get(j).restoreConsistency(l);
+                // Non posso fare la restoreConsistency sulla replica caduta!
+                // TODO: aggiungere verifica della connessione nella funzione
             }
         }
-        // Settarlo esplicitamente con un setter?
-        // istanziare un nuovo oggetto a ogni operazione di write è pesantuccio
-        counter = new Counter();
-        System.out.println("sono il nuovo contatore: " + counter.getValue());
+        for (int i=0; i<writeReplica.size(); i++) {
+            if(verifyQuorum[i] == true) 
+                counter.setValue(counter.getValue() - 1);
+            System.out.println("contatore: " + counter.getValue());
+        }
+        
         return true;
     }
     
