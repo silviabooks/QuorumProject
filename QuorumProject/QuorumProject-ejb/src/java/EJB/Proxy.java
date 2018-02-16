@@ -135,13 +135,16 @@ public class Proxy implements ProxyLocal {
         for (int i=0; i<writeReplica.size(); i++) {
             if(verifyQuorum[i] == true) counter.increment(); 
         }
-        System.out.println(counter.getValue());
-        if(counter.getValue()<quorumWrite) {
+        System.out.println("contatore corrente: " + counter.getValue());
+        if(counter.getValue() < quorumWrite) {
             for(int j = 0; j<writeReplica.size(); j++) {
                 writeReplica.get(j).restoreConsistency(l);
             }
         }
+        // Settarlo esplicitamente con un setter?
+        // istanziare un nuovo oggetto a ogni operazione di write è pesantuccio
         counter = new Counter();
+        System.out.println("sono il nuovo contatore: " + counter.getValue());
         return true;
     }
     

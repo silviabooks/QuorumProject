@@ -42,11 +42,12 @@ public class ReplicaBean implements ReplicaBeanLocal {
     
     private static VersionNumber num;
     
-    private static List<ElementQueue> queue = Collections.synchronizedList(new LinkedList<>());
+    private static List<ElementQueue> queue = 
+            Collections.synchronizedList(new LinkedList<>());
     
     @Override
     public void init() {
-        this.num  = new VersionNumber(0,1);
+        this.num = new VersionNumber(0,1);
         System.out.println(this.toString() + " trying to find an existing queue");
         unserialize("replica1queue.dat");
     }
@@ -83,12 +84,15 @@ public class ReplicaBean implements ReplicaBeanLocal {
     @Override
     public void writeReplica(Log l) {
         queue.add(new ElementQueue(this.num, l, false));
-        this.num.setTimestamp(this.num.getTimestamp()+1);
+        this.num.setTimestamp(this.num.getTimestamp() + 1);
         Collections.sort(queue, new ElementQueueComparator());
         Iterator<ElementQueue> iter = queue.iterator();
         while (iter.hasNext()) {
             ElementQueue e = iter.next();
-            System.out.print("Element in replica1queue: " + e.getLog().toString() + " " + e.isConfirmed() + " " + e.getNum().getTimestamp());
+            System.out.print("Element in replica1queue: " + 
+                    e.getLog().toString() + " " + 
+                    e.isConfirmed() + " " + 
+                    e.getNum().getTimestamp());
         }
     }
     
@@ -102,8 +106,10 @@ public class ReplicaBean implements ReplicaBeanLocal {
     
     @Override
     public void restoreConsistency(Log l) {
-        String delete = "DELETE FROM LOG WHERE timestamp = " + "\'" + l.getTimestamp() + "\' AND idMacchina = " 
-                + "\'" + l.getIdMacchina() + "\' AND message = "+ "\'" + l.getMessage() + "\'";
+        String delete = "DELETE FROM LOG WHERE timestamp = " + "\'" + 
+                l.getTimestamp() + "\' AND idMacchina = "+ "\'" + 
+                l.getIdMacchina() + "\' AND message = "+ "\'" + 
+                l.getMessage() + "\'";
         ConnettoreMySQL connettore = new ConnettoreMySQL("3306");
         connettore.doUpdate(delete);
         connettore.close();
@@ -137,7 +143,8 @@ public class ReplicaBean implements ReplicaBeanLocal {
                         ite.remove();
                         }
                         catch (RuntimeException ex) {
-                            System.out.println("Problem in storing content. " + this.toString() + " down");
+                            System.out.println("Problem in storing content. " + 
+                                    this.toString() + " down");
                             return false;
                         }
                 }

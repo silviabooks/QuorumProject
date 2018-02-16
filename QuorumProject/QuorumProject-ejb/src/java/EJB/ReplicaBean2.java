@@ -42,7 +42,8 @@ public class ReplicaBean2 implements ReplicaBeanLocal {
     
     private static VersionNumber num;
     
-    private static List<ElementQueue> queue = Collections.synchronizedList(new LinkedList<>());
+    private static List<ElementQueue> queue = 
+            Collections.synchronizedList(new LinkedList<>());
     
     @Override
     public void init() {
@@ -88,7 +89,10 @@ public class ReplicaBean2 implements ReplicaBeanLocal {
         Iterator<ElementQueue> iter = queue.iterator();
         while (iter.hasNext()) {
             ElementQueue e = iter.next();
-            System.out.print("Element in replica2queue: " + e.getLog().toString() + " " + e.isConfirmed() + " " + e.getNum().getTimestamp());
+            System.out.print("Element in replica2queue: " + 
+                    e.getLog().toString() + " " + 
+                    e.isConfirmed() + " " + 
+                    e.getNum().getTimestamp());
         }
     }
     
@@ -102,8 +106,10 @@ public class ReplicaBean2 implements ReplicaBeanLocal {
     
     @Override
     public void restoreConsistency(Log l) {
-        String delete = "DELETE FROM LOG WHERE timestamp = " + "\'" + l.getTimestamp() + "\' AND idMacchina = " 
-                + "\'" + l.getIdMacchina() + "\' AND message = "+ "\'" + l.getMessage() + "\'";
+        String delete = "DELETE FROM LOG WHERE timestamp = " + "\'" + 
+                l.getTimestamp() + "\' AND idMacchina = " + "\'" + 
+                l.getIdMacchina() + "\' AND message = "+ "\'" + 
+                l.getMessage() + "\'";
         ConnettoreMySQL connettore = new ConnettoreMySQL("3307");
         connettore.doUpdate(delete);
         connettore.close();
@@ -137,7 +143,8 @@ public class ReplicaBean2 implements ReplicaBeanLocal {
                         ite.remove();
                         }
                         catch (RuntimeException ex) {
-                            System.out.println("Problem in storing content. " + this.toString() + " down");
+                            System.out.println("Problem in storing content. "
+                                    + this.toString() + " down");
                             return false;
                         }
                 }
