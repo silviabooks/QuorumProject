@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package Connettore;
 
 import java.sql.Connection;
@@ -14,13 +9,19 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
+ * Classe di supporto per connettersi al database
  * @author zartyuk
  */
+
 public class ConnettoreMySQL {
     
-     private Connection connection;
+    private Connection connection;
 
+    /**
+     * Crea un connettore verso una specifica replica. Le porte concesse variano nel range 3306-3310
+     * @param port 
+     */
+    
     public ConnettoreMySQL(String port) {
         try {
             Class.forName("com.mysql.jdbc.Driver");
@@ -31,6 +32,13 @@ public class ConnettoreMySQL {
         }
     }
     
+    /**
+     * Effettua un test di connessione per verificare se essa è ancora attiva
+     * Il parametro passato specifica il timeout del test di connessione
+     * @param i
+     * @return 
+     */
+    
     public boolean testConnection(int i) {
          try {
             if(connection!=null) return connection.isValid(i);
@@ -40,11 +48,25 @@ public class ConnettoreMySQL {
          return false;
     }
     
+    /**
+     * Esegue una query Select
+     * @param query
+     * @return
+     * @throws SQLException
+     * @throws NullPointerException 
+     */
+    
     public ResultSet doQuery(String query) throws SQLException, NullPointerException {
         Statement stm = connection.createStatement();
         
         return stm.executeQuery(query);
     }
+    
+    /**
+     * Esegue una query Delete o Insert
+     * @param update
+     * @return 
+     */
     
     public boolean doUpdate(String update) {
         Statement stm = null;

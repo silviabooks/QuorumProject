@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package EJB;
 
 import Connettore.ConnettoreMySQL;
@@ -31,9 +26,11 @@ import javax.ejb.Schedule;
 import javax.ejb.Stateless;
 
 /**
- *
+ * ReplicaManager della replica 3307
+ * Codice commentato nella docs 3306
  * @author zartyuk
  */
+
 @Stateless(name = "secondReplica")
 public class ReplicaBean2 implements ReplicaBeanLocal {
 
@@ -85,14 +82,15 @@ public class ReplicaBean2 implements ReplicaBeanLocal {
         num.setTimestamp(num.getTimestamp()+1);
         queue.add(new ElementQueue(new VersionNumber(num.getTimestamp(), num.getId()), l, false));
         Collections.sort(queue, new ElementQueueComparator());
-        Iterator<ElementQueue> iter = queue.iterator();
+        
+        /*Iterator<ElementQueue> iter = queue.iterator();
         while (iter.hasNext()) {
             ElementQueue e = iter.next();
             System.out.print("Element in replica2queue: " + 
                     e.getLog().toString() + " " + 
                     e.isConfirmed() + " " + 
                     e.getNum().getTimestamp());
-        }
+        }*/
     }
     
     private void updateDatabase(Log l) {
@@ -138,15 +136,14 @@ public class ReplicaBean2 implements ReplicaBeanLocal {
             while (ite.hasNext()) {
                 ElementQueue e = ite.next();
                 if(e.isConfirmed()) {
-                        try {
+                    try {
                         updateDatabase(e.getLog());
                         ite.remove();
-                        }
-                        catch (RuntimeException ex) {
-                            System.out.println("Problem in storing content. "
-                                    + this.toString() + " down");
-                            return false;
-                        }
+                    } catch (RuntimeException ex) {
+                        System.out.println("Problem in storing content. "
+                            + this.toString() + " down");
+                        return false;
+                    }
                 }
                 else break;
             }
@@ -205,7 +202,7 @@ public class ReplicaBean2 implements ReplicaBeanLocal {
     @Schedule(second="1/1", minute = "*", hour = "*", persistent = false)
     private void sendHeartBeat() {
         ConnettoreMySQL connettore = new ConnettoreMySQL("3307");
-        if(connettore.testConnection(2)) {
+        if(connettore.testConnection(1)) {
             System.out.println(this.toString() + " sending HeartBeat");
             faultDetector.receive("second");
         }
@@ -215,7 +212,7 @@ public class ReplicaBean2 implements ReplicaBeanLocal {
     @Override
     public boolean pingAckResponse() {
         ConnettoreMySQL connettore = new ConnettoreMySQL("3307");
-        if(connettore.testConnection(5)) {
+        if(connettore.testConnection(3)) {
             connettore.close();
             return true;
         }

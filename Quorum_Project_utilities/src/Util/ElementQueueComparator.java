@@ -1,16 +1,12 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package Util;
 
 import java.util.Comparator;
 
 /**
- *
+ * Comparatore di ElementQueue. Si occupa di riordinare gli elementi nella coda dei ReplicaManager
  * @author zartyuk
  */
+
 public class ElementQueueComparator implements Comparator<ElementQueue> {
 
     public ElementQueueComparator() {

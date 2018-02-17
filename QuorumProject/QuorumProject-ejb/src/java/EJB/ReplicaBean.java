@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package EJB;
 
 import Connettore.ConnettoreMySQL;
@@ -31,24 +26,33 @@ import javax.ejb.Schedule;
 import javax.ejb.Stateless;
 
 /**
- *
+ * ReplicaManager della replica con porta 3306
  * @author zartyuk
  */
+
 @Stateless(name = "firstReplica")
 public class ReplicaBean implements ReplicaBeanLocal {
 
     @EJB
     private FaultDetectorLocal faultDetector;
     
+    //Version Number della replica
     private static VersionNumber num;
     
+    //Coda in cui sono contenuti i Log prima della fase di commit
     private static List<ElementQueue> queue = 
             Collections.synchronizedList(new LinkedList<>());
+    
+    /**
+     * Inizializza il ReplicaManager
+     */
     
     @Override
     public void init() {
         this.num = new VersionNumber(0,1);
         System.out.println(this.toString() + " trying to find an existing queue");
+        
+        //Carica elementi precedentemente salvati su file in coda
         unserialize("replica1queue.dat");
     }
 
@@ -56,6 +60,12 @@ public class ReplicaBean implements ReplicaBeanLocal {
     public VersionNumber getNum() {
         return this.num;
     }
+    
+    /**
+     * Legge tutti i Log presenti nel database
+     * Ritorna una stringa in formato Json se l'operazione và a buon fine
+     * @return 
+     */
     
     @Override
     public String readReplica() {
@@ -80,20 +90,34 @@ public class ReplicaBean implements ReplicaBeanLocal {
         return "Selected a fault replica. Retry!";
     }
     
+    /**
+     * Scrive il Log in coda e la riordina
+     * @param l 
+     */
+    
     @Override
     public void writeReplica(Log l) {
+        //Incrementa il Version Number della replica per la nuova transazione
         num.setTimestamp(num.getTimestamp() + 1);
+        
+        //Aggiunge un nuovo elemento in coda
         queue.add(new ElementQueue(new VersionNumber(num.getTimestamp(), num.getId()), l, false));
         Collections.sort(queue, new ElementQueueComparator());
-        Iterator<ElementQueue> iter = queue.iterator();
+        
+        /*Iterator<ElementQueue> iter = queue.iterator();
         while (iter.hasNext()) {
             ElementQueue e = iter.next();
             System.out.print("Element in replica1queue: " + 
                     e.getLog().toString() + " " + 
                     e.isConfirmed() + " " + 
                     e.getNum().getTimestamp());
-        }
+        }*/
     }
+    
+    /**
+     * Esegue l'Insert del Log nella replica
+     * @param l 
+     */
     
     private void updateDatabase(Log l) {
         String update = "INSERT INTO LOG VALUES(" + "\'" + l.getTimestamp() + "\'," 
@@ -102,6 +126,13 @@ public class ReplicaBean implements ReplicaBeanLocal {
         connettore.doUpdate(update);
         connettore.close();
     }
+    
+    /**
+     * Esegue la Delete del Log che è stato inserito nella replica
+     * Viene usato per garantire il corretto raggiungimento del quorum
+     * @param l
+     * @throws NullPointerException 
+     */
     
     @Override
     public void restoreConsistency(Log l) throws NullPointerException {
@@ -115,6 +146,13 @@ public class ReplicaBean implements ReplicaBeanLocal {
         System.out.println("Restore consistency of Replica 1");
     }
     
+    /**
+     * Aggiorna il Version Number dell'elemento in coda
+     * Tale Version number è stato deciso dal proxy per garantire il Total Ordering
+     * @param vn
+     * @param l 
+     */
+    
     @Override
     public void updateVersionNumber(VersionNumber vn, Log l) {
         Iterator<ElementQueue> iter = queue.iterator();
@@ -126,14 +164,32 @@ public class ReplicaBean implements ReplicaBeanLocal {
                 break;
             }
         }
+        
+        //Riordina la coda
         Collections.sort(queue, new ElementQueueComparator());
+        
+        //Scrive la coda su file
         serialize("replica1queue.dat");
+        
+        //Aggiorna il version number della replica per allinearlo alle altre
         if(num.getTimestamp() < vn.getTimestamp()) num.setTimestamp(vn.getTimestamp());
     }
     
+    /**
+     * Scrive i valori in coda sulla replica
+     * Salva la coda modificata su file
+     * Ritorna true se la procedura è andata a buon fine, false altrimenti
+     * @return 
+     */
+    
     @Override
     public boolean commit() {
+        
+        //Controlla se la testa della coda è stata confermata dall'updateVersionNumber
         if(!queue.isEmpty() && queue.get(0).isConfirmed() == true) {
+            
+            //Itera tutti gli elementi in coda a partire dalla testa
+            //Se sono confermati, viene fatta l'update nella replica
             Iterator<ElementQueue> ite = queue.iterator();
             while (ite.hasNext()) {
                 ElementQueue e = ite.next();
@@ -143,26 +199,34 @@ public class ReplicaBean implements ReplicaBeanLocal {
                         ite.remove();
                     } catch (RuntimeException ex) {
                         System.out.println("Problem in storing content. " + 
-                        this.toString() + " down");
+                            this.toString() + " down");
                         return false;
                     }
                 }
                 else break;
             }
         }
+        
+        //Riscrive la coda modificata su file
         serialize("replica1queue.dat");
         return true;
     }
     
+    /**
+     * Scrive sul file specificato dal parametro string
+     * @param string 
+     */
+    
     private void serialize(String string) {
         ObjectOutputStream oos = null;
         try {
-            oos = new ObjectOutputStream(new FileOutputStream(string)); //lock required?
+            oos = new ObjectOutputStream(new FileOutputStream(string));
+            
+            //Scrive la size della coda all'inizio. In seguito, scrive i vari elementi
             oos.writeInt(queue.size());
             Iterator<ElementQueue> iter = queue.iterator();
             while (iter.hasNext()) {
                 oos.writeObject(iter.next());
-                
             }
         } catch (FileNotFoundException ex) {
             Logger.getLogger(ReplicaBean.class.getName()).log(Level.SEVERE, null, ex);
@@ -177,6 +241,11 @@ public class ReplicaBean implements ReplicaBeanLocal {
             }
         }
     }
+    
+    /**
+     * Riempie la coda basandosi sul file specificato dal parametro string
+     * @param string 
+     */
     
     private void unserialize(String string) {
         ObjectInputStream ois = null;
@@ -202,20 +271,34 @@ public class ReplicaBean implements ReplicaBeanLocal {
         }
     }
     
+    /**
+     * Invia un HeartBeat al Fault Detector
+     * L'annotazione @Schedule fornisce informazioni sul periodo di invio degli HeartBeat
+     */
+    
     @Schedule(second="1/1", minute = "*", hour = "*", persistent = false)
     private void sendHeartBeat() {
         ConnettoreMySQL connettore = new ConnettoreMySQL("3306");
-        if(connettore.testConnection(2)) {
+        
+        //Verifica se la connessione è attiva
+        if(connettore.testConnection(1)) {
             System.out.println(this.toString() + " sending HeartBeat");
             faultDetector.receive("first");
         }
         connettore.close();
     }
     
+    /**
+     * Metodo invocato dal Fault Detector per verificare se la replica è realmente in Fault
+     * Testa la connessione per un periodo di tempo più lungo
+     * Ritorna true se la connessione è ancora valida, false altrimenti
+     * @return 
+     */
+    
     @Override
     public boolean pingAckResponse() {
         ConnettoreMySQL connettore = new ConnettoreMySQL("3306");
-        if(connettore.testConnection(5)) {
+        if(connettore.testConnection(3)) {
             connettore.close();
             return true;
         }

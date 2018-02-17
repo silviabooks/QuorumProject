@@ -1,16 +1,12 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package Util;
 
 import java.io.Serializable;
 
 /**
- *
+ * Elementi che vengono salvati nella coda interna ai ReplicaManager prima della fase di commit
  * @author zartyuk
  */
+
 public class ElementQueue implements Serializable {
     private VersionNumber num;
     private Log log;

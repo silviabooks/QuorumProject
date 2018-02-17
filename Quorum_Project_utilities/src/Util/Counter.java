@@ -1,14 +1,10 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package Util;
 
 /**
- *
+ * Contatore utilizzato dal Proxy per contare il numero di repliche ancora connesse
  * @author zartyuk
  */
+
 public class Counter {
     int value;
         

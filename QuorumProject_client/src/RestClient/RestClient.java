@@ -11,13 +11,12 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
- *
+ * 
  * @author zartyuk
  */
+
 public class RestClient {
 
     private static final String ENDPOINT = 
@@ -38,6 +37,7 @@ public class RestClient {
                     .post(ClientResponse.class, string);
             System.out.println(rispostaPost.getEntity(String.class));
         }
+        
         /*for(int i=0; i<20; i++) {
         WebResource webResource = client.resource(ENDPOINT + "get");
         ClientResponse rispostaGet = webResource.get(ClientResponse.class);
