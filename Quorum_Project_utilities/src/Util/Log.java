@@ -14,6 +14,17 @@ public class Log implements Serializable {
     private String idMacchina;
     private String message;
     
+    /**
+     * Empty constructor
+     */
+    public Log() {}
+    
+    /**
+     * Contructor with all params
+     * @param timestamp
+     * @param idMacchina
+     * @param message 
+     */
     public Log(Timestamp timestamp, String idMacchina, String message) {
         this.timestamp = timestamp;
         this.idMacchina = idMacchina;
@@ -46,7 +57,8 @@ public class Log implements Serializable {
         
     @Override
     public String toString() {
-        return "Log {" + "timestamp = " + timestamp + ", idMacchina = " + idMacchina + ", message = " + message + '}';
+        return "Log {" + "timestamp = " + timestamp + ", "
+                + "idMacchina = " + idMacchina + ", message = " + message + '}';
     }
 
     @Override

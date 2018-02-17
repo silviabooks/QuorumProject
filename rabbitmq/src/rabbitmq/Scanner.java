@@ -19,41 +19,41 @@ import java.util.logging.Logger;
  * @author silvia
  */
 public class Scanner {
-    private static final String EXCHANGE_NAME = "logs";
+  private static final String EXCHANGE_NAME = "logs";
 
-    public static void main(String[] argv) throws Exception {
-        ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("localhost");
-        Connection connection = factory.newConnection();
-        Channel channel = connection.createChannel();
-        channel.exchangeDeclare(EXCHANGE_NAME, BuiltinExchangeType.FANOUT);
-        
-        String currDir = System.getProperty("user.dir");
-        try {
-            // open log file
-            BufferedReader logReader = new BufferedReader(
-                    new FileReader(currDir + "/log/ERROR_WARN.log"));
-            System.out.println("Reading log...");
-            // read lines
-            while(true) {
-                String logLine = logReader.readLine();
-                // if there are no more entries, break the loop
-                if(logLine == null) break;
-                // analyze the string to find WARN and publish in the queue
-                if(logLine.contains("WARN")) {
-                    channel.basicPublish(EXCHANGE_NAME, "", null,
-                            logLine.getBytes("UTF-8"));
-                    System.out.println(" [x] Sent '" + logLine + "'");
-                }
-            }
-            System.out.println("Scanning complete!");
-            logReader.close();
-            channel.close();
-            connection.close();
-        } catch (FileNotFoundException e) {
-            Logger.getLogger(Scanner.class.getName())
-                    .log(Level.SEVERE, null, e);
-            System.exit(0);
+  public static void main(String[] argv) throws Exception {
+    ConnectionFactory factory = new ConnectionFactory();
+    factory.setHost("localhost");
+    Connection connection = factory.newConnection();
+    Channel channel = connection.createChannel();
+    channel.exchangeDeclare(EXCHANGE_NAME, BuiltinExchangeType.FANOUT);
+
+    String currDir = System.getProperty("user.dir");
+    try {
+      // open log file
+      BufferedReader logReader = new BufferedReader(
+              new FileReader(currDir + "/log/ERROR_WARN.log"));
+      System.out.println("Reading log...");
+      // read lines
+      while(true) {
+        String logLine = logReader.readLine();
+        // if there are no more entries, break the loop
+        if(logLine == null) break;
+        // analyze the string to find WARN and publish in the queue
+        if(logLine.contains("WARN")) {
+          channel.basicPublish(EXCHANGE_NAME, "", null, 
+                  logLine.getBytes("UTF-8"));
+          System.out.println(" [x] Sent '" + logLine + "'");
         }
+      }
+      System.out.println("Scanning complete!");
+      logReader.close();
+      channel.close();
+      connection.close();
+    } catch (FileNotFoundException e) {
+      Logger.getLogger(Scanner.class.getName())
+              .log(Level.SEVERE, null, e);
+      System.exit(0);
     }
+  }
 }
