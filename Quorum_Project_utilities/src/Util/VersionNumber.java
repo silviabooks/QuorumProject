@@ -34,4 +34,8 @@ public class VersionNumber implements Serializable {
     public void setTimestamp(int timestamp) {
         this.timestamp = timestamp;
     }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 }

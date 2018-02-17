@@ -37,16 +37,12 @@ public class RestClient {
             ClientResponse rispostaPost = webResourcePost
                     .post(ClientResponse.class, string);
             System.out.println(rispostaPost.getEntity(String.class));
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException ex) {
-                Logger.getLogger(RestClient.class.getName()).log(Level.SEVERE, null, ex);
-            }
         }
-        
+        /*for(int i=0; i<20; i++) {
         WebResource webResource = client.resource(ENDPOINT + "get");
         ClientResponse rispostaGet = webResource.get(ClientResponse.class);
         System.out.println(rispostaGet.getEntity(String.class));
+        }*/
     }
     
 }

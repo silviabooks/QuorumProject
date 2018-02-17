@@ -10,7 +10,7 @@ package Util;
  * @author zartyuk
  */
 public class Counter {
-    int value; // Statico??
+    int value;
         
     public Counter() {
         this.value = 0;
@@ -20,8 +20,8 @@ public class Counter {
         return value;
     }
 
-    public void setValue(int value) {
-        this.value = value;
+    public void reset() {
+        this.value = 0;
     }
         
     public void increment() {

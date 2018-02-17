@@ -40,7 +40,7 @@ public class ConnettoreMySQL {
          return false;
     }
     
-    public ResultSet doQuery(String query) throws SQLException {
+    public ResultSet doQuery(String query) throws SQLException, NullPointerException {
         Statement stm = connection.createStatement();
         
         return stm.executeQuery(query);

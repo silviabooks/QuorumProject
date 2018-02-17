@@ -54,38 +54,36 @@ public class ReplicaBean4 implements ReplicaBeanLocal {
     
     @Override
     public VersionNumber getNum() {
-        //ConnettoreMySQL connettore = new ConnettoreMySQL("3309");
-        //if(connettore.testConnection(2)) {
-        //    connettore.close();
-            return this.num;
-        //}
-        //else {
-        //    connettore.close();
-        //    return null;
-        //}
+        return this.num;
     }
     
     @Override
-    public String readReplica() throws SQLException {
-        ArrayList<Log> logs = new ArrayList<>();
-        String query = "SELECT * FROM LOG";
-        ConnettoreMySQL connettore = new ConnettoreMySQL("3309");
-        ResultSet rs = connettore.doQuery(query);
-        
-        while(rs.next()){
-            logs.add(new Log(rs.getTimestamp("timestamp"), 
-                    rs.getString("idMacchina"),
-                    rs.getString("message")));
+    public String readReplica() {
+        try {
+            ArrayList<Log> logs = new ArrayList<>();
+            String query = "SELECT * FROM LOG";
+            ConnettoreMySQL connettore = new ConnettoreMySQL("3309");
+            ResultSet rs = connettore.doQuery(query);
+            
+            while(rs.next()){
+                logs.add(new Log(rs.getTimestamp("timestamp"),
+                        rs.getString("idMacchina"),
+                        rs.getString("message")));
+            }
+            connettore.close();
+            return new Gson().toJson(logs);
+        } catch (SQLException ex) {
+            Logger.getLogger(ReplicaBean4.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NullPointerException ex) {
+            System.out.println("Replica 4 was selected, but is probably faultly. Retry the read!");
         }
-        connettore.close();
-        return new Gson().toJson(logs);
+        return "Selected a fault replica. Retry!";
     }
     
     @Override
     public void writeReplica(Log l) {
-        queue.add(new ElementQueue(this.num, l, false));
-        int aux = this.num.getTimestamp();
-        this.num.setTimestamp(this.num.getTimestamp()+1);
+        num.setTimestamp(num.getTimestamp()+1);
+        queue.add(new ElementQueue(new VersionNumber(num.getTimestamp(), num.getId()), l, false));
         Collections.sort(queue, new ElementQueueComparator());
         Iterator<ElementQueue> iter = queue.iterator();
         while (iter.hasNext()) {
@@ -105,10 +103,8 @@ public class ReplicaBean4 implements ReplicaBeanLocal {
         connettore.close();
     }
     
-    
     @Override
-    public void restoreConsistency(Log l) {
-        // TODO aggiungere verifica connettore
+    public void restoreConsistency(Log l) throws NullPointerException {
         String delete = "DELETE FROM LOG WHERE timestamp = " + "\'" + 
                 l.getTimestamp() + "\' AND idMacchina = " + "\'" + 
                 l.getIdMacchina() + "\' AND message = "+ "\'" + 
@@ -116,7 +112,7 @@ public class ReplicaBean4 implements ReplicaBeanLocal {
         ConnettoreMySQL connettore = new ConnettoreMySQL("3309");
         connettore.doUpdate(delete);
         connettore.close();
-        System.out.println("Restore");
+        System.out.println("Restore consistency of Replica 4");
     }
      
     @Override
@@ -132,7 +128,7 @@ public class ReplicaBean4 implements ReplicaBeanLocal {
         }
         Collections.sort(queue, new ElementQueueComparator());
         serialize("replica4queue.dat");
-        if(this.num.getTimestamp() < vn.getTimestamp()) this.num.setTimestamp(vn.getTimestamp());
+        if(num.getTimestamp() < vn.getTimestamp()) num.setTimestamp(vn.getTimestamp());
     }
     
     @Override

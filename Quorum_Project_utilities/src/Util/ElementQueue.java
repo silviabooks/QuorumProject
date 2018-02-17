@@ -39,6 +39,7 @@ public class ElementQueue implements Serializable {
     }
 
     public void setNum(VersionNumber num) {
-        this.num = num;
+        this.num.setTimestamp(num.getTimestamp());
+        this.num.setId(num.getId());
     }
 }

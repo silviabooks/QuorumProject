@@ -7,7 +7,6 @@ package EJB;
 
 import Util.Log;
 import Util.VersionNumber;
-import java.sql.SQLException;
 import javax.ejb.Local;
 
 /**
@@ -17,7 +16,7 @@ import javax.ejb.Local;
 @Local
 public interface ReplicaBeanLocal {
 
-    public String readReplica() throws SQLException;
+    public String readReplica();
 
     public void writeReplica(Log l);
 
@@ -29,7 +28,7 @@ public interface ReplicaBeanLocal {
 
     public void init();
 
-    public void restoreConsistency(Log l);
+    public void restoreConsistency(Log l) throws NullPointerException;
 
     public boolean commit();
 }

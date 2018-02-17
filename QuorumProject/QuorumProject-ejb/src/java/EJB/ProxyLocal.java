@@ -14,7 +14,7 @@ import javax.ejb.Local;
  */
 @Local
 public interface ProxyLocal {
-
+    
     public String readResult();
 
     public boolean writeResult(Log l);
