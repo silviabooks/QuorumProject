@@ -63,10 +63,8 @@ public class ReplicaBean implements ReplicaBeanLocal {
     
     /**
      * Legge tutti i Log presenti nel database
-     * Ritorna una stringa in formato Json se l'operazione và a buon fine
-     * @return 
+     * @return stringa in formato Json se l'operazione và a buon fine
      */
-    
     @Override
     public String readReplica() {
         try {
@@ -94,7 +92,6 @@ public class ReplicaBean implements ReplicaBeanLocal {
      * Scrive il Log in coda e la riordina
      * @param l 
      */
-    
     @Override
     public void writeReplica(Log l) {
         //Incrementa il Version Number della replica per la nuova transazione
@@ -118,7 +115,6 @@ public class ReplicaBean implements ReplicaBeanLocal {
      * Esegue l'Insert del Log nella replica
      * @param l 
      */
-    
     private void updateDatabase(Log l) {
         String update = "INSERT INTO LOG VALUES(" + "\'" + l.getTimestamp() + "\'," 
                 + "\'" + l.getIdMacchina() + "\', "+ "\'" + l.getMessage() + "\'" +")";
@@ -133,7 +129,6 @@ public class ReplicaBean implements ReplicaBeanLocal {
      * @param l
      * @throws NullPointerException 
      */
-    
     @Override
     public void restoreConsistency(Log l) throws NullPointerException {
         String delete = "DELETE FROM LOG WHERE timestamp = " + "\'" + 
@@ -152,7 +147,6 @@ public class ReplicaBean implements ReplicaBeanLocal {
      * @param vn
      * @param l 
      */
-    
     @Override
     public void updateVersionNumber(VersionNumber vn, Log l) {
         Iterator<ElementQueue> iter = queue.iterator();
@@ -178,10 +172,8 @@ public class ReplicaBean implements ReplicaBeanLocal {
     /**
      * Scrive i valori in coda sulla replica
      * Salva la coda modificata su file
-     * Ritorna true se la procedura è andata a buon fine, false altrimenti
-     * @return 
+     * @return true se la procedura è andata a buon fine, false altrimenti
      */
-    
     @Override
     public boolean commit() {
         
@@ -216,7 +208,6 @@ public class ReplicaBean implements ReplicaBeanLocal {
      * Scrive sul file specificato dal parametro string
      * @param string 
      */
-    
     private void serialize(String string) {
         ObjectOutputStream oos = null;
         try {
@@ -246,7 +237,6 @@ public class ReplicaBean implements ReplicaBeanLocal {
      * Riempie la coda basandosi sul file specificato dal parametro string
      * @param string 
      */
-    
     private void unserialize(String string) {
         ObjectInputStream ois = null;
         try {
@@ -275,7 +265,6 @@ public class ReplicaBean implements ReplicaBeanLocal {
      * Invia un HeartBeat al Fault Detector
      * L'annotazione @Schedule fornisce informazioni sul periodo di invio degli HeartBeat
      */
-    
     @Schedule(second="1/1", minute = "*", hour = "*", persistent = false)
     private void sendHeartBeat() {
         ConnettoreMySQL connettore = new ConnettoreMySQL("3306");
@@ -291,10 +280,8 @@ public class ReplicaBean implements ReplicaBeanLocal {
     /**
      * Metodo invocato dal Fault Detector per verificare se la replica è realmente in Fault
      * Testa la connessione per un periodo di tempo più lungo
-     * Ritorna true se la connessione è ancora valida, false altrimenti
-     * @return 
+     * @return true se la connessione è ancora valida, false altrimenti
      */
-    
     @Override
     public boolean pingAckResponse() {
         ConnettoreMySQL connettore = new ConnettoreMySQL("3306");

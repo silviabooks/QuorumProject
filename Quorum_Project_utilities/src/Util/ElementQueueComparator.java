@@ -3,10 +3,10 @@ package Util;
 import java.util.Comparator;
 
 /**
- * Comparatore di ElementQueue. Si occupa di riordinare gli elementi nella coda dei ReplicaManager
+ * Comparatore di ElementQueue. Si occupa di riordinare 
+ * gli elementi nella coda dei ReplicaManager
  * @author zartyuk
  */
-
 public class ElementQueueComparator implements Comparator<ElementQueue> {
 
     public ElementQueueComparator() {

@@ -16,7 +16,6 @@ import javax.ejb.Startup;
  * Rilevatore di Fault delle repliche
  * @author zartyuk
  */
-
 @Singleton
 @Startup
 @ConcurrencyManagement(ConcurrencyManagementType.CONTAINER)
@@ -76,12 +75,12 @@ public class FaultDetector implements FaultDetectorLocal {
      * Il metodo utilizza il patter matching per risalire alla replica che ha inviato il messaggio
      * @param s 
      */
-    
     @Override
     public void receive(String s) {
         switch(s) {
             
-            //Il controllo eseguito in ogni case permette di verificare se la replica è caduta in precedenza (Repliche statiche)
+            // Il controllo eseguito in ogni case permette di verificare 
+            // se la replica è caduta in precedenza (Repliche statiche)
             case "first": if(replicas.get(firstReplica).get(1).booleanValue() == true) {
                     replicas.get(firstReplica).set(0, Boolean.TRUE);
                 }
@@ -107,9 +106,9 @@ public class FaultDetector implements FaultDetectorLocal {
     
     /**
      * Utilizzato per ricercare le repliche sospette di Fault
-     * L'annotazione @Schedule permette di specificare un timer che viene chiamato ogni periodo di tempo specificato
+     * L'annotazione @Schedule permette di specificare un timer che 
+     * viene chiamato ogni periodo di tempo specificato
      */
-    
     @Schedule(second="3/3", minute = "*", hour = "*", persistent = false)
     private void verifyReplicas() {
         for(Map.Entry<ReplicaBeanLocal, ArrayList<Boolean>> entry : replicas.entrySet()) {
@@ -125,18 +124,21 @@ public class FaultDetector implements FaultDetectorLocal {
                 entry.setValue(new ArrayList<>(Arrays.asList(Boolean.FALSE, Boolean.TRUE)));
             }
         }
-        pingAck(); //Avvia un controllo specifico per verificare se la replica è realmente in Fault
+        pingAck();
     }
     
     
-    
+    /**
+     * Avvia un controllo specifico per verificare se la replica è realmente in Fault
+     */
     private void pingAck() {
         for(int i =0; i<suspected.size(); i++) {
             if(!suspected.get(i).pingAckResponse()) {
                 //La replica non risponde. Essa viene considerata in Fault
                 System.out.println("Connection lost! Remove replica from proxy list");
                 
-                //Il FaultDetector avvisa il proxy che quella replica non deve essere contattata durante letture e scritture
+                //Il FaultDetector avvisa il proxy che quella replica non 
+                //deve essere contattata durante letture e scritture
                 proxy.removeReplica(suspected.get(i));
                 
                 //La replica viene etichettata come Replica in Fault

@@ -8,7 +8,6 @@ import java.util.Objects;
  * Log da salvare all'interno delle repliche
  * @author zartyuk
  */
-
 public class Log implements Serializable {
     private Timestamp timestamp;
     private String idMacchina;

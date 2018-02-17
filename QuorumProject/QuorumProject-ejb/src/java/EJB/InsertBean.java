@@ -8,7 +8,6 @@ import javax.ejb.Stateless;
  * Bean demandato alla esecuzione degli inserimenti dei Log
  * @author zartyuk
  */
-
 @Stateless
 public class InsertBean implements InsertBeanRemote {
 

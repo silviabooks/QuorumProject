@@ -3,10 +3,10 @@ package Util;
 import java.io.Serializable;
 
 /**
- * Elementi che vengono salvati nella coda interna ai ReplicaManager prima della fase di commit
+ * Elementi che vengono salvati nella coda interna ai 
+ * ReplicaManager prima della fase di commit
  * @author zartyuk
  */
-
 public class ElementQueue implements Serializable {
     private VersionNumber num;
     private Log log;

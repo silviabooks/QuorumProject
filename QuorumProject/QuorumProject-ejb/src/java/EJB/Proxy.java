@@ -20,7 +20,6 @@ import javax.ejb.Startup;
  * Accesso ai metodi sincronizzato: è permesso l'accesso a un solo scrittore o a più lettori
  * @author zartyuk
  */
-
 @Singleton
 @Startup
 @ConcurrencyManagement(ConcurrencyManagementType.CONTAINER)
@@ -71,10 +70,8 @@ public class Proxy implements ProxyLocal {
     /**
      * Metodo Lockato in Read: più lettori possono accedere concorrentemente
      * Si occupa di fornire i dati richiesti
-     * Ritorna null se il quorum non è raggiungibile
-     * @return 
+     * @return null se il quorum non è raggiungibile
      */
-    
     @Lock(LockType.READ)
     @Override
     public String readResult() {
@@ -84,7 +81,7 @@ public class Proxy implements ProxyLocal {
             return null;
         }
         
-        //Inizializza una Listaa ausiliaria
+        //Inizializza una Lista ausiliaria
         List<ReplicaBeanLocal> auxReplica = new ArrayList<>();
         for(int i=0; i<replicas.size(); i++)
             auxReplica.add(replicas.get(i));
@@ -104,10 +101,8 @@ public class Proxy implements ProxyLocal {
     /**
      * Metodo Lockato in Write: un solo scrittore può accedere
      * Si occupa di scrivere i Log forniti
-     * Ritorna false se il quorum non è raggiungibile
-     * @return 
+     * @return false se il quorum non è raggiungibile
      */
-    
     @Lock(LockType.WRITE)
     @Override
     public boolean writeResult(Log l) {
@@ -166,7 +161,6 @@ public class Proxy implements ProxyLocal {
      * Viene invocato dal Fault Detector per rimuovere la replica dalla lista delle repliche disponibili
      * @param b 
      */
-    
     @Lock(LockType.WRITE)
     @Override
     public void removeReplica(ReplicaBeanLocal b) {

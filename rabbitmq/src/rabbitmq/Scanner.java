@@ -22,7 +22,9 @@ public class Scanner {
   private static final String EXCHANGE_NAME = "logs";
 
   public static void main(String[] argv) throws Exception {
+    // RabbitMQ factory
     ConnectionFactory factory = new ConnectionFactory();
+    // Connect to local RabbitMQ queue
     factory.setHost("localhost");
     Connection connection = factory.newConnection();
     Channel channel = connection.createChannel();
@@ -51,8 +53,7 @@ public class Scanner {
       channel.close();
       connection.close();
     } catch (FileNotFoundException e) {
-      Logger.getLogger(Scanner.class.getName())
-              .log(Level.SEVERE, null, e);
+      Logger.getLogger(Scanner.class.getName()).log(Level.SEVERE, null, e);
       System.exit(0);
     }
   }

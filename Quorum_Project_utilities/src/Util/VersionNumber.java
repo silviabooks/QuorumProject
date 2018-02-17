@@ -7,7 +7,6 @@ import java.io.Serializable;
  * Utilizzata anche nella coda dei ReplicaManager per garantire Total Ordering
  * @author zartyuk
  */
-
 public class VersionNumber implements Serializable {
     
     private int timestamp;

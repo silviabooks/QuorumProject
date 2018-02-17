@@ -1,10 +1,10 @@
 package Util;
 
 /**
- * Contatore utilizzato dal Proxy per contare il numero di repliche ancora connesse
+ * Contatore utilizzato dal Proxy per contare 
+ * il numero di repliche ancora connesse
  * @author zartyuk
  */
-
 public class Counter {
     int value;
         
