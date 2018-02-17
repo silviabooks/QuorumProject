@@ -1,7 +1,18 @@
 # MyApp
 
-## Riferimento
-https://github.com/angular/angular-cli
+- Riferimento: https://github.com/angular/angular-cli
+- Per dockerizzare l'app: https://github.com/avatsaev/angular4-docker-example
+- Guida Angular: https://angular.io/guide/quickstart
+- Altra guida Angular CLI: https://www.sitepoint.com/ultimate-angular-cli-reference/
+
+### Installazione NodeJS e Angular
+https://nodejs.org/en/download/package-manager/
+
+https://angular.io/guide/quickstart
+
+Visual Studio Code mi pare carino come IDE...
+
+-----
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 1.7.0.
 
