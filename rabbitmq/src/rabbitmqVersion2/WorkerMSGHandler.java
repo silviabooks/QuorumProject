@@ -40,7 +40,8 @@ public class WorkerMSGHandler {
             Pattern.compile("WARN( )+.+ - ");
     // We assume that the body of the message is all that follows " - "
     private static final Pattern msgPattern = Pattern.compile(" - .*");
-
+    
+    // Instantiation of the object needed in handleDelivery
     private static Log log = new Log();
     private static Client client = Client.create();
     private static Gson reqGson = new Gson();
@@ -53,11 +54,7 @@ public class WorkerMSGHandler {
         factory.setHost("localhost");
         final Connection connection = factory.newConnection();
         final Channel channel = connection.createChannel();
-        
-        //channel.exchangeDeclare(EXCHANGE_NAME, BuiltinExchangeType.FANOUT);
-        //String queueName = channel.queueDeclare().getQueue();
-        //channel.queueBind(queueName, EXCHANGE_NAME, "");
-        
+                
         channel.queueDeclare(TASK_QUEUE_NAME, true, false, false, null);
         System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
 
@@ -119,23 +116,25 @@ public class WorkerMSGHandler {
                 System.out.println(msg);
             }
         }
-        // TODO add if
-        log.setIdMacchina(machineID);
-        log.setMessage(msg);
-        log.setTimestamp(timestampSql);
-        System.out.println("VOGLIO INVIARE: " + log.toString());
-        String reqString = reqGson.toJson(log);
-        WebResource webResourcePost = client.resource(URL_POST);
-        ClientResponse rispostaPost = webResourcePost
-                .post(ClientResponse.class, reqString);
-        System.out.println("HO RICEVUTO: "
-                + rispostaPost.getEntity(String.class));
-        // Sleep to avoid my PC to explode
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(WorkerMSGHandler.class.getName())
-                    .log(Level.SEVERE, null, ex);
+        if(timestamp != null && machineID != null && msg != null) {
+            log.setIdMacchina(machineID);
+            log.setMessage(msg);
+            log.setTimestamp(timestampSql);
+            System.out.println("VOGLIO INVIARE: " + log.toString());
+            String reqString = reqGson.toJson(log);
+            WebResource webResourcePost = client.resource(URL_POST);
+            ClientResponse rispostaPost = webResourcePost
+                    .post(ClientResponse.class, reqString);
+            System.out.println("HO RICEVUTO: "
+                    + rispostaPost.getEntity(String.class));
+            // Sleep to avoid my PC to explode
+            /*try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(WorkerMSGHandler.class.getName())
+                        .log(Level.SEVERE, null, ex);
+            }
+            */
         }
     }
 }
