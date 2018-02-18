@@ -13,11 +13,15 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 /**
  * Rest API per interagire con il sistema
+ * Esempio  
+ * -­   Eventi  ordinati  nel  tempo  per  tutte  le  macchine
+ * -­   Eventi  ordinati  nel  tempo  per  una  singola  macchina
  * @author zartyuk
  */
 
@@ -26,6 +30,10 @@ public class RestAPI {
     
     private static final String BEAN_ENDPOINT = "java:global/QuorumProject/QuorumProject-ejb/";
     
+    /**
+     * Gets all saved log
+     * @return string in JSON format if the read is successful
+     */
     @GET
     @Path("/get")
     @Produces(MediaType.TEXT_PLAIN)
@@ -34,14 +42,40 @@ public class RestAPI {
         
         //Chiama il bean remoto per la read
         String aux = readBean.readBean();
-        if(aux!=null) return aux;
-        else return("Problem in read. Can't reach read quorum!");
+        if(aux != null) 
+            return aux;
+        else 
+            return("Problem in read. Can't reach read quorum!");
     }
     
+    /**
+     * Gets all logs from a specific machine
+     * @param idMacchina
+     * @return string in JSON format if the read is successful
+     */
+    @GET
+    @Path("/get/{idMacchina}")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String getIDLogs(@PathParam("idMacchina") String idMacchina) {
+        // Remote bean call
+        ReadBeanRemote readBean = lookupReadBeanRemote();
+        String result = readBean.readMachineIDBean(idMacchina);
+        if(result != null)
+            return result;
+        else 
+            return("Problem in read. Can't reach read quorum!");
+    }
+    
+    /**
+     * Adds a log entry in the DB from a POST request from the client
+     * @param l log in JSON format
+     * @return 
+     */
     @POST
     @Path("/post")
     @Consumes(MediaType.TEXT_PLAIN)
     public String addLog(String l) {
+        //Conversione da JSON a oggetto Log
         Log log = new Gson().fromJson(l, Log.class);
         InsertBeanRemote insertBean = lookupInsertBeanRemote();
         
@@ -49,6 +83,26 @@ public class RestAPI {
         if (insertBean.insertBean(log)) return "LOG AGGIUNTO";
         else return "Problem in write. Can't reach write quorum!";
     }
+    
+    /* ESEMPIO
+    
+    @Path("/hello")
+    public class helloRest {
+
+        @GET
+        @Path("{username}")
+        public Response sayHello(@PathParam("username")
+                String username){
+
+            return Response.status(200)
+                    .entity("hello " + username)
+                    .build();
+        }
+    }
+    */
+    
+    //TODO add more APIs
+       
 
     private ReadBeanRemote lookupReadBeanRemote() {
         try {

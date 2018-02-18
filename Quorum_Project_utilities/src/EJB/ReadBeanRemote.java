@@ -11,4 +11,6 @@ public interface ReadBeanRemote {
 
     public String readBean();
     
+    // TODO add method declarations
+    public String readMachineIDBean(String idMacchina);
 }

@@ -55,7 +55,11 @@ public class ReplicaBean implements ReplicaBeanLocal {
         //Carica elementi precedentemente salvati su file in coda
         unserialize("replica1queue.dat");
     }
-
+    
+    /**
+     * Getter
+     * @return Version number of the replica
+     */
     @Override
     public VersionNumber getNum() {
         return this.num;
@@ -87,6 +91,8 @@ public class ReplicaBean implements ReplicaBeanLocal {
         }
         return "Selected a fault replica. Retry!";
     }
+    
+    // TODO add methods with different queries
     
     /**
      * Scrive il Log in coda e la riordina

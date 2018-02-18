@@ -114,7 +114,8 @@ public class FaultDetector implements FaultDetectorLocal {
         for(Map.Entry<ReplicaBeanLocal, ArrayList<Boolean>> entry : replicas.entrySet()) {
             
             //Controlla se la replica non ha mandato HeartBeat nell'ultimo ciclo di Fault Detection
-            if(entry.getValue().get(0).booleanValue() == false && entry.getValue().get(1).booleanValue() == true) {
+            if(entry.getValue().get(0).booleanValue() == false 
+                    && entry.getValue().get(1).booleanValue() == true) {
                 suspected.add(entry.getKey());
                 System.out.println("Added suspected replica " + entry.getKey().toString());
             }

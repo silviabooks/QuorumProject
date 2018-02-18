@@ -22,6 +22,7 @@ public class RestClient {
     private static final String ENDPOINT = 
             "http://localhost:8080/QuorumProject-war/gestione/log/";
     /**
+     * Simple client to test the RESTful API
      * @param args the command line arguments
      */
     public static void main(String[] args) {
@@ -32,6 +33,7 @@ public class RestClient {
                     "spero funzioni" + i);
             System.out.println(log.toString());
             String string = new Gson().toJson(log);
+            // POST request
             WebResource webResourcePost = client.resource(ENDPOINT + "post");
             ClientResponse rispostaPost = webResourcePost
                     .post(ClientResponse.class, string);

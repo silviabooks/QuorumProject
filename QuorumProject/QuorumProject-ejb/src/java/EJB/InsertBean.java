@@ -13,6 +13,11 @@ public class InsertBean implements InsertBeanRemote {
 
     @EJB
     private ProxyLocal proxy;
+    /**
+     * Simple insertion of a log 
+     * @param log to be inserted
+     * @return same return value of proxy.writeResult() from Proxy EJB 
+     */
     public boolean insertBean(Log log) {
         return proxy.writeResult(log);
     }

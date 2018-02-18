@@ -90,9 +90,11 @@ public class Proxy implements ProxyLocal {
         ReplicaBeanLocal aux = auxReplica.get(0);
         //Confronta i timestamp delle repliche e legge da quella più aggiornata
         for (int i=1; i<quorumRead; i++) {
-            if (auxReplica.get(i).getNum().getTimestamp() > aux.getNum().getTimestamp()) aux = auxReplica.get(i);
+            if (auxReplica.get(i).getNum().getTimestamp() > aux.getNum().getTimestamp()) 
+                aux = auxReplica.get(i);
             else if(auxReplica.get(i).getNum().getTimestamp() == aux.getNum().getTimestamp()) {
-                if(auxReplica.get(i).getNum().getId() > aux.getNum().getId()) aux = auxReplica.get(i);
+                if(auxReplica.get(i).getNum().getId() > aux.getNum().getId()) 
+                    aux = auxReplica.get(i);
             }
         }
         return aux.readReplica(); //If a replica fault response, retry? //************************
