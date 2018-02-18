@@ -48,7 +48,7 @@ public class MSGHandler {
     Pattern machineIDPattern = Pattern.compile("WARN( )+.+ - ");
     // We assume that the body of the message is all that follows " - "
     Pattern msgPattern = Pattern.compile(" - .*");
-
+    // Instantiation of the object needed in handleDelivery
     Log log = new Log();
     Client client = Client.create();
     Gson reqGson = new Gson();

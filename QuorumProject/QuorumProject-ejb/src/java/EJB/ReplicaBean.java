@@ -46,7 +46,6 @@ public class ReplicaBean implements ReplicaBeanLocal {
     /**
      * Inizializza il ReplicaManager
      */
-    
     @Override
     public void init() {
         this.num = new VersionNumber(0,1);
@@ -93,6 +92,31 @@ public class ReplicaBean implements ReplicaBeanLocal {
     }
     
     // TODO add methods with different queries
+    /**
+     * Come readReplica, ma accetta q come parametro
+     * @param q query SQL da eseguire sulla replica
+     * @return stringa in formato Json se l'operazione và a buon fine
+     */
+    @Override
+    public String queryReadReplica(String q) {
+        try {
+            ArrayList<Log> logs = new ArrayList<>();
+            ConnettoreMySQL connettore = new ConnettoreMySQL("3306");
+            ResultSet rs = connettore.doQuery(q);
+            while(rs.next()) {
+                logs.add(new Log(rs.getTimestamp("timestamp"),
+                        rs.getString("idMacchina"),
+                        rs.getString("message")));
+            }
+            connettore.close();
+            return new Gson().toJson(logs);
+        } catch (SQLException ex) {
+            Logger.getLogger(ReplicaBean.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NullPointerException ex) {
+            System.out.println("Replica 1 was selected, but is probably faultly. Retry the read!");
+        }
+        return "Selected a fault replica. Retry!";
+    }
     
     /**
      * Scrive il Log in coda e la riordina

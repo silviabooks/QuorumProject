@@ -22,9 +22,14 @@ public class ReadBean implements ReadBeanRemote {
     }
     
     // TODO add methods to make the queries
-
+    /**
+     * Reads all entries of a specified machine ID
+     * @param idMacchina
+     * @return same return value of readWithQuery from Proxy EJB
+     */
     @Override
     public String readMachineIDBean(String idMacchina) {
-        return "dammi tempu ca ti perciu";
+        return proxy.readWithQuery("SELECT * FROM LOG WHERE idMacchina='" 
+                + idMacchina + "';");
     }
 }

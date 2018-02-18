@@ -13,6 +13,8 @@ import javax.ejb.Local;
 public interface ReplicaBeanLocal {
 
     public String readReplica();
+    
+    public String queryReadReplica(String q);
 
     public void writeReplica(Log l);
 

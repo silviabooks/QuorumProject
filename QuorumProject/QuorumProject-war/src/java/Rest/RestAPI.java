@@ -20,8 +20,9 @@ import javax.ws.rs.core.MediaType;
 /**
  * Rest API per interagire con il sistema
  * Esempio  
- * -­   Eventi  ordinati  nel  tempo  per  tutte  le  macchine
- * -­   Eventi  ordinati  nel  tempo  per  una  singola  macchina
+ * - Eventi  ordinati  nel  tempo  per  tutte  le  macchine
+ * - Eventi  ordinati  nel  tempo  per  una  singola  macchina
+ * - Ultimo evento (query "SELECT TOP 1 * FROM LOG ORDER BY timestamp DESC")
  * @author zartyuk
  */
 
@@ -84,26 +85,6 @@ public class RestAPI {
         else return "Problem in write. Can't reach write quorum!";
     }
     
-    /* ESEMPIO
-    
-    @Path("/hello")
-    public class helloRest {
-
-        @GET
-        @Path("{username}")
-        public Response sayHello(@PathParam("username")
-                String username){
-
-            return Response.status(200)
-                    .entity("hello " + username)
-                    .build();
-        }
-    }
-    */
-    
-    //TODO add more APIs
-       
-
     private ReadBeanRemote lookupReadBeanRemote() {
         try {
             Context c = new InitialContext();

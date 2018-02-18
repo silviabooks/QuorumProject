@@ -67,6 +67,8 @@ public class Proxy implements ProxyLocal {
         //System.out.println(replicas.toString());
     }
     
+       
+    
     /**
      * Metodo Lockato in Read: più lettori possono accedere concorrentemente
      * Si occupa di fornire i dati richiesti
@@ -98,6 +100,40 @@ public class Proxy implements ProxyLocal {
             }
         }
         return aux.readReplica(); //If a replica fault response, retry? //************************
+    }
+    
+    /**
+     * 
+     * @param q stringa con la query da passare al RM
+     * @return 
+     */
+    @Lock(LockType.READ)
+    @Override
+    public String readWithQuery(String q) {
+        //Verifica se è possibile raggiungere il quorum
+        if(replicas.size() < quorumRead) {
+            System.out.println("I can't perform a read cause there are no sufficient replicas");
+            return null;
+        }
+        //Inizializza una Lista ausiliaria
+        List<ReplicaBeanLocal> auxReplica = new ArrayList<>();
+        for(int i=0; i<replicas.size(); i++)
+            auxReplica.add(replicas.get(i));
+        //Esegue lo shuffle per selezionare due replice in maniera casuale
+        Collections.shuffle(auxReplica);
+        ReplicaBeanLocal aux = auxReplica.get(0);
+        //Confronta i timestamp delle repliche e legge da quella più aggiornata
+        for (int i=1; i<quorumRead; i++) {
+            if (auxReplica.get(i).getNum().getTimestamp() > aux.getNum().getTimestamp()) 
+                aux = auxReplica.get(i);
+            else if(auxReplica.get(i).getNum().getTimestamp() == aux.getNum().getTimestamp()) {
+                if(auxReplica.get(i).getNum().getId() > aux.getNum().getId()) 
+                    aux = auxReplica.get(i);
+            }
+        }
+        // TODO cambiare con la funzione che accetta la query come parametro
+        return aux.queryReadReplica(q);
+
     }
     
     /**
@@ -169,4 +205,6 @@ public class Proxy implements ProxyLocal {
         replicas.remove(b);
         System.out.println(replicas.toString());
     }
+
+    
 }

@@ -12,6 +12,8 @@ import javax.ejb.Local;
 public interface ProxyLocal {
     
     public String readResult();
+    
+    public String readWithQuery(String q);
 
     public boolean writeResult(Log l);
 

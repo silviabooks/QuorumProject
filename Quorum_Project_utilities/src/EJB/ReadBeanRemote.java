@@ -9,8 +9,16 @@ import javax.ejb.Remote;
 @Remote
 public interface ReadBeanRemote {
 
+    /**
+     * Simple read
+     * @return
+     */
     public String readBean();
     
-    // TODO add method declarations
+    /**
+     * Reads all entries of a specified machine ID
+     * @param idMacchina 
+     * @return 
+     */
     public String readMachineIDBean(String idMacchina);
 }

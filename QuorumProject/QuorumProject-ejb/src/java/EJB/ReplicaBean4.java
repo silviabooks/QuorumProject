@@ -78,6 +78,28 @@ public class ReplicaBean4 implements ReplicaBeanLocal {
     }
     
     @Override
+    public String queryReadReplica(String q) {
+        try {
+            ArrayList<Log> logs = new ArrayList<>();
+            ConnettoreMySQL connettore = new ConnettoreMySQL("3306");
+            ResultSet rs = connettore.doQuery(q);
+            while(rs.next()) {
+                logs.add(new Log(rs.getTimestamp("timestamp"),
+                        rs.getString("idMacchina"),
+                        rs.getString("message")));
+            }
+            connettore.close();
+            return new Gson().toJson(logs);
+        } catch (SQLException ex) {
+            Logger.getLogger(ReplicaBean.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NullPointerException ex) {
+            System.out.println("Replica 4 was selected, but is probably faultly. Retry the read!");
+        }
+        return "Selected a fault replica. Retry!";
+    }
+    
+    
+    @Override
     public void writeReplica(Log l) {
         num.setTimestamp(num.getTimestamp()+1);
         queue.add(new ElementQueue(new VersionNumber(num.getTimestamp(), num.getId()), l, false));

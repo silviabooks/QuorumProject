@@ -29,8 +29,8 @@ public class RestClient {
         Client client = Client.create();
         for(int i = 0; i < 20; i++) {
             Date date = new Date();
-            Log log = new Log(new java.sql.Timestamp(date.getTime()) ,"prova" + i, 
-                    "spero funzioni" + i);
+            Log log = new Log(new java.sql.Timestamp(date.getTime()), "peppino", 
+                    "corpo messaggio " + i);
             System.out.println(log.toString());
             String string = new Gson().toJson(log);
             // POST request
