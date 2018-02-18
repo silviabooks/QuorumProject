@@ -21,7 +21,6 @@ public class ReadBean implements ReadBeanRemote {
         return proxy.readResult();
     }
     
-    // TODO add methods to make the queries
     /**
      * Reads all entries of a specified machine ID
      * @param idMacchina
@@ -32,4 +31,28 @@ public class ReadBean implements ReadBeanRemote {
         return proxy.readWithQuery("SELECT * FROM LOG WHERE idMacchina='" 
                 + idMacchina + "';");
     }
+
+    /**
+     * Reads last log inserted in the DB
+     * @return same return value of readWithQuery from Proxy EJB
+     */
+    @Override
+    public String readLastLogBean() {
+        return proxy.readWithQuery("SELECT * FROM LOG "
+                + "ORDER BY timestamp DESC LIMIT 1;");
+    }
+
+    /**
+     * Reads logs with timestamps in a specific interval
+     * @param begin timestamp of the beginning of the interval
+     * @param end timestamp of the end of the interval
+     * @return same return value of readWithQuery from Proxy EJB
+     */
+    @Override
+    public String readTimestampIntervalBean(String begin, String end) {
+        return proxy.readWithQuery("SELECT * FROM LOG WHERE timestamp "
+                + "BETWEEN '" + begin + "' and '" + end + "';");
+    }
+    
+    
 }

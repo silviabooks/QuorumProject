@@ -21,4 +21,18 @@ public interface ReadBeanRemote {
      * @return 
      */
     public String readMachineIDBean(String idMacchina);
+    
+    /**
+     * Reads last log in the DB
+     * @return 
+     */
+    public String readLastLogBean();
+    
+    /**
+     * Reads logs with timestamps in a specific interval
+     * @param begin timestamp of the beginning of the interval
+     * @param end timestamp of the end of the interval
+     * @return 
+     */
+    public String readTimestampIntervalBean(String begin, String end);
 }

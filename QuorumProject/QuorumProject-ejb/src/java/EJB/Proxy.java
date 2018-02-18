@@ -131,7 +131,6 @@ public class Proxy implements ProxyLocal {
                     aux = auxReplica.get(i);
             }
         }
-        // TODO cambiare con la funzione che accetta la query come parametro
         return aux.queryReadReplica(q);
 
     }

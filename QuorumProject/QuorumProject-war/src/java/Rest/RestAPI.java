@@ -22,7 +22,8 @@ import javax.ws.rs.core.MediaType;
  * Esempio  
  * - Eventi  ordinati  nel  tempo  per  tutte  le  macchine
  * - Eventi  ordinati  nel  tempo  per  una  singola  macchina
- * - Ultimo evento (query "SELECT TOP 1 * FROM LOG ORDER BY timestamp DESC")
+ * - Eventi in una certa finestra temporale
+ * - Ultimo evento 
  * @author zartyuk
  */
 
@@ -68,9 +69,46 @@ public class RestAPI {
     }
     
     /**
+     * Reads last log inserted in the DB
+     * @return string in JSON format if the read is successful
+     */
+    @GET
+    @Path("/getLast")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String getLastLog() {
+        // Remote bean call
+        ReadBeanRemote readBean = lookupReadBeanRemote();
+        String result = readBean.readLastLogBean();
+        if(result != null)
+            return result;
+        else 
+            return("Problem in read. Can't reach read quorum!");
+    }
+    
+    /**
+     * Reads logs with timestamps in a specific interval
+     * @param begin timestamp of the beginning of the interval
+     * @param end timestamp of the end of the interval
+     * @return string in JSON format if the read is successful
+     */
+    @GET 
+    @Path("/timestamp/{begin}/{end}")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String getTimestampInterval(@PathParam("begin") String begin, 
+            @PathParam("end") String end) {
+        // Remote bean call
+        ReadBeanRemote readBean = lookupReadBeanRemote();
+        String result = readBean.readTimestampIntervalBean(begin, end);
+        if(result != null)
+            return result;
+        else 
+            return("Problem in read. Can't reach read quorum!");
+    }
+    
+    /**
      * Adds a log entry in the DB from a POST request from the client
      * @param l log in JSON format
-     * @return 
+     * @return string with the outcome of the insertion
      */
     @POST
     @Path("/post")
@@ -81,8 +119,10 @@ public class RestAPI {
         InsertBeanRemote insertBean = lookupInsertBeanRemote();
         
         //Chiama il bean remoto per la write
-        if (insertBean.insertBean(log)) return "LOG AGGIUNTO";
+        if (insertBean.insertBean(log)) 
+            return "LOG AGGIUNTO";
         else return "Problem in write. Can't reach write quorum!";
+        // TODO Se necessario per la GUI, modificare le stringhe di ritorno
     }
     
     private ReadBeanRemote lookupReadBeanRemote() {

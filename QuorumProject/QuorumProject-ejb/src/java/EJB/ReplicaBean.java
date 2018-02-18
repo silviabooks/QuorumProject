@@ -91,7 +91,6 @@ public class ReplicaBean implements ReplicaBeanLocal {
         return "Selected a fault replica. Retry!";
     }
     
-    // TODO add methods with different queries
     /**
      * Come readReplica, ma accetta q come parametro
      * @param q query SQL da eseguire sulla replica
