@@ -3,7 +3,7 @@ import { NgModule } from '@angular/core';
 
 
 import { AppComponent } from './app.component';
-
+import { AnalyzerComponent } from './analyzer/analyzer.component';
 
 @NgModule({
   declarations: [
