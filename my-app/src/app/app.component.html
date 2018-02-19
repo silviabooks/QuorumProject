@@ -4,13 +4,16 @@
   </h1>
 </div>
 <h2>These are our APIs: </h2>
-TODO: form per l'id macchina, 
-      form per la finestra temporale
-      <br><br>
-<div id="buttons">
-  <button (click)=getAllLogs()>Show all logs</button>
-  <br><button (click)=getLastEvent()>Show last event</button>
-  <br>
+
+<div>
+  <br><button style="width:220px" (click)=getAllLogs()>Show all logs</button>
+  <br><button style="width:220px" (click)=getLastEvent()>Show last event</button>
+  <br><button style="width:220px" (click)=getMachineID(machineID.value)>Seach machine ID</button>
+      <input type="text" #machineID placeholder="Insert here the machine ID">
+  <br><button style="width:220px" (click)=searchTimeInterval(begin.value,end.value)>
+      Search logs in time interval</button>
+      <input type="text" #begin value="2018-02-18 16:43:01">
+      <input type="text" #end value="2018-02-18 16:43:03">
 </div>
 
 <!--ul>
