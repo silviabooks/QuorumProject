@@ -4,9 +4,26 @@
   </h1>
 </div>
 <h2>These are our APIs: </h2>
-<ul>
-  <li>
-    <h2>TODO mettere l'elenco delle API</h2>
-  </li>
-</ul>
+TODO: form per l'id macchina, 
+      form per la finestra temporale
+      <br><br>
+<div id="buttons">
+  <button (click)=getAllLogs()>Show all logs</button>
+  <br><button (click)=getLastEvent()>Show last event</button>
+  <br>
+</div>
 
+<!--ul>
+  <li>
+    <h2></h2>
+  </li>
+</ul-->
+<h2>{{resultTitle}}</h2>
+<div style="overflow-y:scroll; height:300px;">
+  <div *ngFor="let log of data">
+    <b>Timestamp: </b>{{log.timestamp}} 
+    <br><b>MachineID: </b>{{log.idMacchina}}
+    <br><b>Message: </b>{{log.message}}
+    <br><br>
+  </div>
+</div>
