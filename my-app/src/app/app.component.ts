@@ -21,7 +21,7 @@ export class AppComponent {
                 .map((res: Response) => res.json())
                  .subscribe(data => {
                         this.data = data;
-                        this.resultTitle = 'All logs';
+                        this.resultTitle = 'All logs:';
                         console.log(this.data);
                 });
   }
@@ -31,7 +31,7 @@ export class AppComponent {
                 .map((res: Response) => res.json())
                  .subscribe(data => {
                         this.data = data;
-                        this.resultTitle = 'Last event';
+                        this.resultTitle = 'Last event:';
                         console.log(this.data);
                 });
   }
