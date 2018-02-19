@@ -14,10 +14,7 @@ export class AppComponent {
   resultTitle = 'The results will be shown here...';
 
 
-  constructor(private _http: Http) {  
-    title = 'QuorumProject';
-    resultTitle = 'The results will be shown here...';
-    data: any = {};
+  constructor(private _http: Http) {
   }
 
   public getAllLogs() {
