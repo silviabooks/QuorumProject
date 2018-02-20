@@ -7,8 +7,9 @@ l'invio e la ricezione dei messaggi.
 In questo, il producer è lo Scanner, e il consumer è il Message Handler.
 
 Sono disponibili due implementazioni dei due elementi del sistema:
-- *Work queues*: permette di eseguire un task time-comsuming da parte del consumer. Infatti, il consumer viene implementato come un worker che esegue in background e consuma gli elementi dalla coda attraverso dei task. 
-- *Publish/subscribe*: consente la presenza di più consumer, ognuno dei quali consuma una riga di log con un IP diverso (i due IP specificati nell'homework). In questo caso l'exchange type è `fanout`: esso permette di avere più consumatori che non vanno in conflitto tra loro.
+
+* *Work queues*: permette di eseguire un task time-comsuming da parte del consumer. Infatti, il consumer viene implementato come un worker che esegue in background e consuma gli elementi dalla coda attraverso dei task. 
+* *Publish/subscribe*: consente la presenza di più consumer, ognuno dei quali consuma una riga di log con un IP diverso (i due IP specificati nell'homework). In questo caso l'exchange type è `fanout`: esso permette di avere più consumatori che non vanno in conflitto tra loro.
 
 ## Scanner
 Lo scanner è stato implementato come una classe Java che va a leggere il file
