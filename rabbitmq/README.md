@@ -10,11 +10,10 @@ Sono disponibili due implementazioni dei due elementi del sistema:
 * *Work queues*: permette di eseguire un task time-comsuming da parte del 
 consumer. Infatti, il consumer viene implementato come un worker che esegue in 
 background e consuma gli elementi dalla coda attraverso dei task. 
-
 * *Publish/subscribe*: consente la presenza di più consumer, ognuno dei quali
 consuma una riga di log con un IP diverso (i due IP specificati nell'homework).
-In questo caso l'exchange type è `fanout`: esso permette di avere più consumatori
- che non vanno in conflitto tra loro.
+In questo caso l'exchange type è `fanout`: esso permette di avere più 
+consumatori che non vanno in conflitto tra loro.
 
 
 ## Scanner
@@ -32,8 +31,13 @@ L'implementazione dello Scanner è stata eseguita con una semplice classe Java c
 un main.
 
 
-
 ##Message Handler
-*pippotto sulle regex*
-Il Message Handler 
+Il Message Handler consuma gli elementi della coda e li analizza 
+(Content-based mode).
+Per fare ciò, vengono utilizzate delle Regular expression per individuare i 
+timestamp, gli ID macchina e i messaggi. Se la riga di log che viene prelevata 
+dalla coda contiene i pattern specificati dalle regEx, viene salvata su DB 
+effettuando la richesta HTTP POST all'indirizzo specifico delle API.
+
+
 
