@@ -1,4 +1,4 @@
-package rabbitmq;
+package msghandler.thread;
 
 import com.rabbitmq.client.*;
 import java.io.IOException;

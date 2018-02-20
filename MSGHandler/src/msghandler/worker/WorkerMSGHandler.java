@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package rabbitmqVersion2;
+package msghandler.worker;
 
 import Util.Log;
 import com.google.gson.Gson;
@@ -21,10 +21,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import rabbitmq.MSGHandler;
 
 /**
- *
+ * Il MSGHandler salva il log sul DB solo se l’oggetto è 
+ * “Error receiving object from	“ e l’IP è 10.18.122.24 o 10.18.122.30
+ * Sul DB viene salvato: Timestamp – IdMacchina - Messaggio	
  * @author silvia
  */
 public class WorkerMSGHandler {
@@ -104,7 +105,7 @@ public class WorkerMSGHandler {
                     Date parsedDate = dateFormat.parse(timestamp);
                     timestampSql.setTime(parsedDate.getTime());
                 } catch (ParseException ex) {
-                    Logger.getLogger(MSGHandler.class.getName())
+                    Logger.getLogger(WorkerMSGHandler.class.getName())
                             .log(Level.SEVERE, null, ex);
                 }
 

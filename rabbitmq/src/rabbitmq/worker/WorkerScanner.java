@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package rabbitmqVersion2;
+package rabbitmq.worker;
 
 import com.rabbitmq.client.BuiltinExchangeType;
 import com.rabbitmq.client.Channel;
@@ -15,10 +15,13 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import rabbitmq.Scanner;
 
 /**
- *
+ * SCANNER
+ * Legge le righe del file di log e le analizza
+ * Ogni	volta che c’è una entry WARN,
+ * l’intera riga di log viene pubblicata nella coda.
+ * 
  * @author silvia
  */
 public class WorkerScanner {
@@ -58,7 +61,7 @@ public class WorkerScanner {
             channel.close();
             connection.close();
         } catch (FileNotFoundException e) {
-            Logger.getLogger(Scanner.class.getName())
+            Logger.getLogger(WorkerScanner.class.getName())
                     .log(Level.SEVERE, null, e);
             System.exit(0);
         }

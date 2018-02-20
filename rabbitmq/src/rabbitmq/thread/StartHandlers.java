@@ -3,10 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package rabbitmq;
+package rabbitmq.thread;
 
 /**
- *
+ * Main per l'esecuzione dei due thread
  * @author silvia
  */
 public class StartHandlers {
