@@ -11,8 +11,6 @@ import javax.ejb.Local;
 
 @Local
 public interface ReplicaBeanLocal {
-
-    public String readReplica();
     
     public String queryReadReplica(String q);
 
@@ -26,7 +24,7 @@ public interface ReplicaBeanLocal {
 
     public void init();
 
-    public void restoreConsistency(Log l) throws NullPointerException;
+    public void restoreConsistency(Log l) throws Exception;
 
     public boolean commit();
 }

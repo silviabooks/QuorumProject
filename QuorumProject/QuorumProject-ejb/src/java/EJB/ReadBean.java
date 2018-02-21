@@ -15,10 +15,10 @@ public class ReadBean implements ReadBeanRemote {
     
     /**
      * Simple read
-     * @return same return value of proxy.readResult() from Proxy EJB
+     * @return same return value of readWithQuery from Proxy EJB
      */
     public String readBean() {
-        return proxy.readResult();
+        return proxy.readWithQuery("SELECT * FROM LOG;");
     }
     
     /**

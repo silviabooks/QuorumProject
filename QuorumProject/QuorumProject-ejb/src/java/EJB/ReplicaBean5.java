@@ -55,29 +55,6 @@ public class ReplicaBean5 implements ReplicaBeanLocal {
     }
     
     @Override
-    public String readReplica() {
-        try {
-            ArrayList<Log> logs = new ArrayList<>();
-            String query = "SELECT * FROM LOG";
-            ConnettoreMySQL connettore = new ConnettoreMySQL("3310");
-            ResultSet rs = connettore.doQuery(query);
-            
-            while(rs.next()){
-                logs.add(new Log(rs.getTimestamp("timestamp"),
-                        rs.getString("idMacchina"),
-                        rs.getString("message")));
-            }
-            connettore.close();
-            return new Gson().toJson(logs);
-        } catch (SQLException ex) {
-            Logger.getLogger(ReplicaBean5.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NullPointerException ex) {
-            System.out.println("Replica 5 was selected, but is probably faultly. Retry the read!");
-        }
-        return "Selected a fault replica. Retry!";
-    }
-    
-    @Override
     public String queryReadReplica(String q) {
         try {
             ArrayList<Log> logs = new ArrayList<>();
@@ -124,7 +101,7 @@ public class ReplicaBean5 implements ReplicaBeanLocal {
     }
     
     @Override
-    public void restoreConsistency(Log l) throws NullPointerException {
+    public void restoreConsistency(Log l) throws Exception {
         String delete = "DELETE FROM LOG WHERE timestamp = " + "\'" + 
                 l.getTimestamp() + "\' AND idMacchina = " + "\'" + 
                 l.getIdMacchina() + "\' AND message = "+ "\'" + 

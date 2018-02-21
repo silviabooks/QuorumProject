@@ -63,36 +63,9 @@ public class ReplicaBean implements ReplicaBeanLocal {
     public VersionNumber getNum() {
         return this.num;
     }
-    
+        
     /**
-     * Legge tutti i Log presenti nel database
-     * @return stringa in formato Json se l'operazione và a buon fine
-     */
-    @Override
-    public String readReplica() {
-        try {
-            ArrayList<Log> logs = new ArrayList<>();
-            String query = "SELECT * FROM LOG";
-            ConnettoreMySQL connettore = new ConnettoreMySQL("3306");
-            ResultSet rs = connettore.doQuery(query);
-            
-            while(rs.next()){
-                logs.add(new Log(rs.getTimestamp("timestamp"),
-                        rs.getString("idMacchina"),
-                        rs.getString("message")));
-            }
-            connettore.close();
-            return new Gson().toJson(logs);
-        } catch (SQLException ex) {
-            Logger.getLogger(ReplicaBean.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NullPointerException ex) {
-            System.out.println("Replica 1 was selected, but is probably faultly. Retry the read!");
-        }
-        return "Selected a fault replica. Retry!";
-    }
-    
-    /**
-     * Come readReplica, ma accetta q come parametro
+     * Fornisce i dati richiesti tramite query SQL
      * @param q query SQL da eseguire sulla replica
      * @return stringa in formato Json se l'operazione và a buon fine
      */
@@ -159,7 +132,7 @@ public class ReplicaBean implements ReplicaBeanLocal {
      * @throws NullPointerException 
      */
     @Override
-    public void restoreConsistency(Log l) throws NullPointerException {
+    public void restoreConsistency(Log l) throws Exception {
         String delete = "DELETE FROM LOG WHERE timestamp = " + "\'" + 
                 l.getTimestamp() + "\' AND idMacchina = "+ "\'" + 
                 l.getIdMacchina() + "\' AND message = "+ "\'" + 

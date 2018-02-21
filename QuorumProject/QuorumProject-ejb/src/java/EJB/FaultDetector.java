@@ -39,12 +39,11 @@ public class FaultDetector implements FaultDetectorLocal {
     @EJB(beanName = "fifthReplica")
     private ReplicaBeanLocal fifthReplica;
 
-    // TODO : Il singleton gestisce già la concorrenza dato che ogni metodo è lockato in write di default
-    // Non serve una hashmap concorrente (????) *********************************
     
     /** 
      * Mappa (Repliche, Array di due elementi booleani)
-     * Il primo campo dell'array booleano specifica se la replica è sospettata per questo ciclo di Fault Detection
+     * Il primo campo dell'array booleano specifica se la replica è 
+     * sospettata per questo ciclo di Fault Detection
      * (False = Sospettata, True = Non Sospettata)
      * Il secondo campo è utilizzato dalla procedura specifica di pingAck
      * Se tale campo è false, la replica è considerata caduta
