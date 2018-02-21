@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<ClassDiagram name="Multi-file class diagram">
+  <ClassDiagramComponents>
+    <Class name="FaultDetector" package="EJB" visibility="public" xPosition="653.0" yPosition="687.0">
+      <Fields>
+        <Field name="proxy" type="ProxyLocal" visibility="private"/>
+        <Field name="secondReplica" type="ReplicaBeanLocal" visibility="private"/>
+        <Field name="firstReplica" type="ReplicaBeanLocal" visibility="private"/>
+        <Field name="thirdReplica" type="ReplicaBeanLocal" visibility="private"/>
+        <Field name="fourthReplica" type="ReplicaBeanLocal" visibility="private"/>
+        <Field name="fifthReplica" type="ReplicaBeanLocal" visibility="private"/>
+        <Field name="replicas" type="ConcurrentHashMap&lt;ReplicaBeanLocal, ArrayList&lt;Boolean&gt;&gt;" visibility="private"/>
+        <Field name="suspected" type="ArrayList&lt;ReplicaBeanLocal&gt;" visibility="private"/>
+      </Fields>
+      <Constructors/>
+      <Methods>
+        <Method name="init" returnType="void" visibility="private"/>
+        <Method name="receive" returnType="void" visibility="public">
+          <Argument type="String" name="s"/>
+        </Method>
+        <Method name="verifyReplicas" returnType="void" visibility="private"/>
+        <Method name="pingAck" returnType="void" visibility="private"/>
+      </Methods>
+    </Class>
+    <Class name="InsertBean" package="EJB" visibility="public" xPosition="69.0" yPosition="42.0">
+      <Fields>
+        <Field name="proxy" type="ProxyLocal" visibility="private"/>
+      </Fields>
+      <Constructors/>
+      <Methods>
+        <Method name="insertBean" returnType="boolean" visibility="public">
+          <Argument type="Log" name="log"/>
+        </Method>
+      </Methods>
+    </Class>
+    <Class name="Proxy" package="EJB" visibility="public" xPosition="534.0" yPosition="295.0">
+      <Fields>
+        <Field name="secondReplica" type="ReplicaBeanLocal" visibility="private"/>
+        <Field name="firstReplica" type="ReplicaBeanLocal" visibility="private"/>
+        <Field name="thirdReplica" type="ReplicaBeanLocal" visibility="private"/>
+        <Field name="fourthReplica" type="ReplicaBeanLocal" visibility="private"/>
+        <Field name="fifthReplica" type="ReplicaBeanLocal" visibility="private"/>
+        <Field name="replicas" type="List&lt;ReplicaBeanLocal&gt;" visibility="private"/>
+        <Field name="quorumRead" type="int" visibility="private"/>
+        <Field name="quorumWrite" type="int" visibility="private"/>
+      </Fields>
+      <Constructors/>
+      <Methods>
+        <Method name="init" returnType="void" visibility="private"/>
+        <Method name="readWithQuery" returnType="String" visibility="public">
+          <Argument type="String" name="q"/>
+        </Method>
+        <Method name="writeResult" returnType="boolean" visibility="public">
+          <Argument type="Log" name="l"/>
+        </Method>
+        <Method name="removeReplica" returnType="void" visibility="public">
+          <Argument type="ReplicaBeanLocal" name="b"/>
+        </Method>
+      </Methods>
+    </Class>
+    <Class name="ReadBean" package="EJB" visibility="public" xPosition="32.0" yPosition="597.0">
+      <Fields>
+        <Field name="proxy" type="ProxyLocal" visibility="private"/>
+      </Fields>
+      <Constructors/>
+      <Methods>
+        <Method name="readBean" returnType="String" visibility="public"/>
+        <Method name="readMachineIDBean" returnType="String" visibility="public">
+          <Argument type="String" name="idMacchina"/>
+        </Method>
+        <Method name="readLastLogBean" returnType="String" visibility="public"/>
+        <Method name="readTimestampIntervalBean" returnType="String" visibility="public">
+          <Argument type="String" name="begin"/>
+          <Argument type="String" name="end"/>
+        </Method>
+      </Methods>
+    </Class>
+    <Class name="ReplicaBean" package="EJB" visibility="public" xPosition="1410.0" yPosition="269.0">
+      <Fields>
+        <Field name="faultDetector" type="FaultDetectorLocal" visibility="private"/>
+        <Field name="num" type="VersionNumber" visibility="private" isStatic="true"/>
+        <Field name="queue" type="List&lt;ElementQueue&gt;" visibility="private" isStatic="true"/>
+      </Fields>
+      <Constructors/>
+      <Methods>
+        <Method name="init" returnType="void" visibility="public"/>
+        <Method name="getNum" returnType="VersionNumber" visibility="public"/>
+        <Method name="queryReadReplica" returnType="String" visibility="public">
+          <Argument type="String" name="q"/>
+        </Method>
+        <Method name="writeReplica" returnType="void" visibility="public">
+          <Argument type="Log" name="l"/>
+        </Method>
+        <Method name="updateDatabase" returnType="void" visibility="private">
+          <Argument type="Log" name="l"/>
+        </Method>
+        <Method name="restoreConsistency" returnType="void" visibility="public">
+          <Argument type="Log" name="l"/>
+        </Method>
+        <Method name="updateVersionNumber" returnType="void" visibility="public">
+          <Argument type="VersionNumber" name="vn"/>
+          <Argument type="Log" name="l"/>
+        </Method>
+        <Method name="commit" returnType="boolean" visibility="public"/>
+        <Method name="serialize" returnType="void" visibility="private">
+          <Argument type="String" name="string"/>
+        </Method>
+        <Method name="unserialize" returnType="void" visibility="private">
+          <Argument type="String" name="string"/>
+        </Method>
+        <Method name="sendHeartBeat" returnType="void" visibility="private"/>
+        <Method name="pingAckResponse" returnType="boolean" visibility="public"/>
+      </Methods>
+    </Class>
+    <Interface name="FaultDetectorLocal" package="EJB" visibility="public" xPosition="1278.0" yPosition="773.0">
+      <Methods>
+        <Method name="receive" returnType="void" visibility="public">
+          <Argument type="String" name="s"/>
+        </Method>
+      </Methods>
+    </Interface>
+    <Interface name="ProxyLocal" package="EJB" visibility="public" xPosition="32.0" yPosition="280.0">
+      <Methods>
+        <Method name="readWithQuery" returnType="String" visibility="public">
+          <Argument type="String" name="q"/>
+        </Method>
+        <Method name="writeResult" returnType="boolean" visibility="public">
+          <Argument type="Log" name="l"/>
+        </Method>
+        <Method name="removeReplica" returnType="void" visibility="public">
+          <Argument type="ReplicaBeanLocal" name="b"/>
+        </Method>
+      </Methods>
+    </Interface>
+    <Interface name="ReplicaBeanLocal" package="EJB" visibility="public" xPosition="1027.0" yPosition="66.0">
+      <Methods>
+        <Method name="queryReadReplica" returnType="String" visibility="public">
+          <Argument type="String" name="q"/>
+        </Method>
+        <Method name="writeReplica" returnType="void" visibility="public">
+          <Argument type="Log" name="l"/>
+        </Method>
+        <Method name="getNum" returnType="VersionNumber" visibility="public"/>
+        <Method name="updateVersionNumber" returnType="void" visibility="public">
+          <Argument type="VersionNumber" name="num"/>
+          <Argument type="Log" name="l"/>
+        </Method>
+        <Method name="pingAckResponse" returnType="boolean" visibility="public"/>
+        <Method name="init" returnType="void" visibility="public"/>
+        <Method name="restoreConsistency" returnType="void" visibility="public">
+          <Argument type="Log" name="l"/>
+        </Method>
+        <Method name="commit" returnType="boolean" visibility="public"/>
+      </Methods>
+    </Interface>
+  </ClassDiagramComponents>
+  <ClassDiagramRelations>
+    <HasRelation name="fourthReplica" source="EJB.Proxy" target="EJB.ReplicaBeanLocal" type="Aggregation" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <HasRelation name="secondReplica" source="EJB.Proxy" target="EJB.ReplicaBeanLocal" type="Aggregation" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <HasRelation name="faultDetector" source="EJB.ReplicaBean" target="EJB.FaultDetectorLocal" type="Aggregation" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <UseRelation source="EJB.ProxyLocal" target="EJB.ReplicaBeanLocal" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <HasRelation name="suspected" source="EJB.FaultDetector" target="EJB.ReplicaBeanLocal" type="Aggregation" sourceCardinality="1..1" targetCardinality="0..*" collectionType="ArrayList&lt;ReplicaBeanLocal&gt;"/>
+    <UseRelation source="EJB.Proxy" target="EJB.ReplicaBeanLocal" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <ImplementsRelation name="&lt;&lt;implements&gt;&gt;" source="EJB.FaultDetector" target="EJB.FaultDetectorLocal"/>
+    <HasRelation name="thirdReplica" source="EJB.FaultDetector" target="EJB.ReplicaBeanLocal" type="Aggregation" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <HasRelation name="firstReplica" source="EJB.Proxy" target="EJB.ReplicaBeanLocal" type="Aggregation" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <HasRelation name="fifthReplica" source="EJB.Proxy" target="EJB.ReplicaBeanLocal" type="Aggregation" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <HasRelation name="thirdReplica" source="EJB.Proxy" target="EJB.ReplicaBeanLocal" type="Aggregation" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <HasRelation name="proxy" source="EJB.ReadBean" target="EJB.ProxyLocal" type="Aggregation" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <HasRelation name="proxy" source="EJB.FaultDetector" target="EJB.ProxyLocal" type="Aggregation" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <HasRelation name="fifthReplica" source="EJB.FaultDetector" target="EJB.ReplicaBeanLocal" type="Aggregation" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <ImplementsRelation name="&lt;&lt;implements&gt;&gt;" source="EJB.ReplicaBean" target="EJB.ReplicaBeanLocal"/>
+    <HasRelation name="secondReplica" source="EJB.FaultDetector" target="EJB.ReplicaBeanLocal" type="Aggregation" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <HasRelation name="replicas" source="EJB.FaultDetector" target="EJB.ReplicaBeanLocal" type="Aggregation" sourceCardinality="1..1" targetCardinality="0..*" collectionType="ConcurrentHashMap&lt;ReplicaBeanLocal, ArrayList&lt;Boolean&gt;&gt;"/>
+    <HasRelation name="fourthReplica" source="EJB.FaultDetector" target="EJB.ReplicaBeanLocal" type="Aggregation" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <HasRelation name="proxy" source="EJB.InsertBean" target="EJB.ProxyLocal" type="Aggregation" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <HasRelation name="replicas" source="EJB.Proxy" target="EJB.ReplicaBeanLocal" type="Aggregation" sourceCardinality="1..1" targetCardinality="0..*" collectionType="List&lt;ReplicaBeanLocal&gt;"/>
+    <HasRelation name="firstReplica" source="EJB.FaultDetector" target="EJB.ReplicaBeanLocal" type="Aggregation" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <ImplementsRelation name="&lt;&lt;implements&gt;&gt;" source="EJB.Proxy" target="EJB.ProxyLocal"/>
+  </ClassDiagramRelations>
+</ClassDiagram>
